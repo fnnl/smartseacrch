@@ -182,7 +182,7 @@ export function foldDe(token: string): string {
 export function stemDe(token: string): string {
   const word = foldDe(token);
   for (const suffix of STEM_SUFFIXES) {
-    if (word.length - suffix.length >= 4 && word.endsWith(suffix)) {
+    if (word.length - suffix.length >= 5 && word.endsWith(suffix)) {
       return word.slice(0, -suffix.length);
     }
   }
@@ -199,7 +199,9 @@ export function tokenize(text: string): string[] {
     if (STOPWORDS.has(raw) || STOPWORDS.has(folded)) continue;
     const stemmed = stemDe(folded);
     if (stemmed.length < 2 || STOPWORDS.has(stemmed)) continue;
-    tokens.push(stemmed);
+    tokens.push(folded);
+    if (stemmed !== folded) tokens.push(stemmed);
+    if (folded.length >= 10) tokens.push(folded.slice(-6));
   }
 
   return tokens;

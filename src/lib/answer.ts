@@ -69,36 +69,83 @@ export async function answerQuestion(
 
 function buildExtractiveAnswer(question: string, ranked: RankedChunk[]): string {
   const queryTokens = new Set(tokenize(question));
-  const scored: { text: string; score: number }[] = [];
+  const candidates = ranked
+    .slice(0, 5)
+    .map(({ chunk, score }) => {
+      const window = bestSentenceWindow(chunk.text, queryTokens);
+      return {
+        text: window.text,
+        score: window.score + score * 0.2,
+      };
+    })
+    .filter((item) => item.text && item.score > 0)
+    .sort((a, b) => b.score - a.score);
 
-  for (const { chunk, score } of ranked) {
-    for (const sentence of splitSentences(chunk.text)) {
-      const tokens = tokenize(sentence);
-      const overlap = tokens.filter((token) => queryTokens.has(token)).length;
-      if (overlap === 0) continue;
-      scored.push({
-        text: sentence,
-        score: overlap + score * 0.12,
-      });
-    }
-  }
-
-  const unique: { text: string; score: number }[] = [];
+  const parts: string[] = [];
   const seen = new Set<string>();
-  for (const item of scored.sort((a, b) => b.score - a.score)) {
+  for (const item of candidates) {
     const key = item.text.toLowerCase();
     if (seen.has(key)) continue;
     seen.add(key);
-    unique.push(item);
-    if (unique.length >= 3) break;
+    parts.push(item.text);
+    if (parts.join(" ").length > 280 || parts.length >= 2) break;
   }
 
-  if (!unique.length) {
+  if (!parts.length) {
     const fallback = ranked[0]?.chunk.text.replace(/\s+/g, " ").trim() ?? "";
     return fallback.length > 480 ? `${fallback.slice(0, 480).trimEnd()}…` : fallback;
   }
 
-  return unique.map((item) => item.text).join(" ");
+  return parts.join(" ");
+}
+
+function bestSentenceWindow(
+  text: string,
+  queryTokens: Set<string>,
+): { text: string; score: number } {
+  const sentences = splitSentences(text);
+  if (!sentences.length) {
+    return { text: text.replace(/\s+/g, " ").trim(), score: 0 };
+  }
+
+  const scores = sentences.map((sentence) => {
+    const tokens = new Set(tokenize(sentence));
+    let overlap = 0;
+    for (const token of queryTokens) {
+      if (tokens.has(token)) overlap += 1;
+    }
+    return overlap;
+  });
+
+  let bestIndex = 0;
+  let bestScore = -1;
+  for (let index = 0; index < scores.length; index += 1) {
+    const windowScore =
+      (scores[index] ?? 0) * 1.2 +
+      (scores[index + 1] ?? 0) +
+      (scores[index + 2] ?? 0) * 0.4;
+    if (windowScore > bestScore) {
+      bestScore = windowScore;
+      bestIndex = index;
+    }
+  }
+
+  if (bestScore <= 0) return { text: "", score: 0 };
+
+  const picked: string[] = [];
+  let length = 0;
+  for (let index = bestIndex; index < sentences.length && picked.length < 6; index += 1) {
+    const sentence = sentences[index];
+    if (!sentence) continue;
+    picked.push(sentence);
+    length += sentence.length;
+    if (length >= 380) break;
+  }
+
+  return {
+    text: picked.join(" "),
+    score: bestScore,
+  };
 }
 
 function contextBlock(ranked: RankedChunk[]): string {

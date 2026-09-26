@@ -40,7 +40,7 @@ export function chunkText(text: string): string[] {
     const next = current ? `${current}\n\n${unit}` : unit;
     if (next.length > CHUNK_TARGET_CHARS && current) {
       chunks.push(current.trim());
-      const overlap = current.slice(-CHUNK_OVERLAP_CHARS).trim();
+      const overlap = tailOverlap(current, CHUNK_OVERLAP_CHARS);
       current = overlap ? `${overlap} ${unit}` : unit;
     } else {
       current = next;
@@ -49,6 +49,13 @@ export function chunkText(text: string): string[] {
 
   if (current.trim()) chunks.push(current.trim());
   return chunks;
+}
+
+function tailOverlap(text: string, size: number): string {
+  if (text.length <= size) return text.trim();
+  const slice = text.slice(-size);
+  const boundary = slice.search(/\s/);
+  return (boundary >= 0 ? slice.slice(boundary) : slice).trim();
 }
 
 function splitLong(text: string): string[] {

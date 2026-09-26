@@ -63,7 +63,9 @@ async function extractDocx(bytes: Uint8Array): Promise<string> {
 
 async function extractPdf(bytes: Uint8Array): Promise<string> {
   try {
-    const pdf = await getDocumentProxy(bytes);
+    // unpdf rejects Node Buffer; copy into a plain Uint8Array.
+    const data = new Uint8Array(bytes);
+    const pdf = await getDocumentProxy(data);
     const extracted = await extractText(pdf, { mergePages: true });
     return extracted.text;
   } catch {
