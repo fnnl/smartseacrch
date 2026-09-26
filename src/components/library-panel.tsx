@@ -1,5 +1,3 @@
-"use client";
-
 import {
   FileTextIcon,
   FolderOpenIcon,
@@ -7,16 +5,11 @@ import {
   Trash2Icon,
   UploadIcon,
 } from "lucide-react";
-import { useRef, useState } from "react";
+import { useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import {
-  displayPathFor,
-  filesFromDataTransfer,
-  filesFromFileList,
-} from "@/lib/collect-files";
 import { formatBytes, formatDocumentKind } from "@/lib/format";
 import type { LibraryDocument, SkippedFile } from "@/lib/types";
 
@@ -26,7 +19,9 @@ type LibraryPanelProps = {
   ingesting: boolean;
   skipped: SkippedFile[];
   error: string | null;
-  onUpload: (files: File[]) => Promise<void>;
+  onPickFiles: () => Promise<void> | void;
+  onPickFolder: () => Promise<void> | void;
+  onDropPaths: (paths: string[]) => Promise<void> | void;
   onLoadSample: () => Promise<void>;
   onRemove: (id: string) => Promise<void>;
   onClear: () => Promise<void>;
@@ -38,20 +33,15 @@ export function LibraryPanel({
   ingesting,
   skipped,
   error,
-  onUpload,
+  onPickFiles,
+  onPickFolder,
+  onDropPaths,
   onLoadSample,
   onRemove,
   onClear,
 }: LibraryPanelProps) {
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const folderInputRef = useRef<HTMLInputElement>(null);
   const [dragging, setDragging] = useState(false);
   const [confirmClear, setConfirmClear] = useState(false);
-
-  const handleFiles = async (files: File[]) => {
-    if (!files.length) return;
-    await onUpload(files);
-  };
 
   return (
     <div className="flex h-full min-h-0 flex-col">
@@ -85,25 +75,28 @@ export function LibraryPanel({
           if (event.currentTarget.contains(event.relatedTarget as Node)) return;
           setDragging(false);
         }}
-        onDrop={async (event) => {
+        onDrop={(event) => {
           event.preventDefault();
           setDragging(false);
-          const files = await filesFromDataTransfer(event.dataTransfer);
-          await handleFiles(files);
+          const paths = [...event.dataTransfer.files]
+            .map((file) => window.smartsearch.pathForFile(file))
+            .filter(Boolean);
+          if (paths.length) void onDropPaths(paths);
         }}
       >
         <p className="text-sm leading-5 text-foreground">
-          Dateien hier ablegen oder Ordner wählen. SmartSeacrch liest{" "}
-          <span className="font-medium">.docx</span>,{" "}
+          Wähle einen Ordner auf diesem Rechner — oder einzelne Dateien.
+          SmartSeacrch liest <span className="font-medium">.docx</span>,{" "}
           <span className="font-medium">.pdf</span> und{" "}
-          <span className="font-medium">.txt</span>.
+          <span className="font-medium">.txt</span> lokal. Nichts wird
+          hochgeladen.
         </p>
         <div className="mt-3 flex flex-wrap gap-2">
           <Button
             type="button"
             size="sm"
             disabled={ingesting}
-            onClick={() => fileInputRef.current?.click()}
+            onClick={() => void onPickFiles()}
           >
             <UploadIcon data-icon="inline-start" />
             Dateien
@@ -113,7 +106,7 @@ export function LibraryPanel({
             size="sm"
             variant="outline"
             disabled={ingesting}
-            onClick={() => folderInputRef.current?.click()}
+            onClick={() => void onPickFolder()}
           >
             <FolderOpenIcon data-icon="inline-start" />
             Ordner
@@ -128,32 +121,6 @@ export function LibraryPanel({
             Beispiel laden
           </Button>
         </div>
-        <input
-          ref={fileInputRef}
-          type="file"
-          hidden
-          multiple
-          accept=".docx,.pdf,.txt,.md,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain"
-          onChange={async (event) => {
-            const files = await filesFromFileList(event.target.files ?? []);
-            event.target.value = "";
-            await handleFiles(files);
-          }}
-        />
-        <input
-          ref={(node) => {
-            folderInputRef.current = node;
-            if (node) node.setAttribute("webkitdirectory", "");
-          }}
-          type="file"
-          hidden
-          multiple
-          onChange={async (event) => {
-            const files = await filesFromFileList(event.target.files ?? []);
-            event.target.value = "";
-            await handleFiles(files);
-          }}
-        />
       </div>
 
       {ingesting && (
@@ -183,9 +150,8 @@ export function LibraryPanel({
         <div className="px-4 pb-4">
           {documents.length === 0 && !ingesting ? (
             <div className="rounded-xl bg-background/80 px-3 py-6 text-sm leading-6 text-muted-foreground">
-              Lege Problembeschreibungen und Handbücher aus einem Ordner hier
-              ab. Danach kannst du Fragen stellen — die Antwort nennt Datei und
-              Stelle.
+              Nimm den Ordner mit Problembeschreibungen und Handbüchern. Die
+              Suche bleibt auf diesem Computer.
             </div>
           ) : (
             <ul className="space-y-2">
@@ -269,13 +235,4 @@ export function LibraryPanel({
 
 function displayName(doc: LibraryDocument): string {
   return doc.displayPath.includes("/") ? doc.displayPath : doc.fileName;
-}
-
-export function filePayload(files: File[]): FormData {
-  const form = new FormData();
-  for (const file of files) {
-    form.append("files", file);
-    form.append("paths", displayPathFor(file));
-  }
-  return form;
 }

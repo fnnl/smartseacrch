@@ -1,7 +1,7 @@
 export const ACCEPTED_EXTENSIONS = [".docx", ".pdf", ".txt", ".md"] as const;
 
 export const MAX_FILE_BYTES = 15 * 1024 * 1024;
-export const MAX_FILES_PER_UPLOAD = 80;
+export const MAX_FILES_PER_UPLOAD = 250;
 
 export const CHUNK_TARGET_CHARS = 1100;
 export const CHUNK_OVERLAP_CHARS = 120;

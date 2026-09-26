@@ -1,5 +1,3 @@
-"use client";
-
 import { ArrowUpIcon, BookOpenIcon, LoaderCircleIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
@@ -113,15 +111,10 @@ export function ChatPanel({
       </div>
 
       <form
-        method="get"
-        action="/"
         className="border-t px-3 py-3 md:px-6"
         onSubmit={(event) => {
           event.preventDefault();
-          const form = event.currentTarget;
-          const typed = new FormData(form).get("question");
-          const fromField = typeof typed === "string" ? typed : draft;
-          void submitFrom(fromField);
+          void submitFrom(draft);
         }}
       >
         <div className="flex items-end gap-2">
@@ -194,17 +187,15 @@ function EmptyChat({
       {documentCount > 0 && (
         <div className="flex flex-wrap gap-2">
           {EXAMPLES.map((example) => (
-            <a
+            <button
               key={example}
-              href={`/?question=${encodeURIComponent(example)}`}
-              className={`hover:bg-muted rounded-full border px-3 py-1.5 text-left text-sm transition-colors ${asking ? "pointer-events-none opacity-50" : ""}`}
-              onClick={(event) => {
-                event.preventDefault();
-                onAsk(example);
-              }}
+              type="button"
+              disabled={asking}
+              className="hover:bg-muted rounded-full border px-3 py-1.5 text-left text-sm transition-colors disabled:opacity-50"
+              onClick={() => onAsk(example)}
             >
               {example}
-            </a>
+            </button>
           ))}
         </div>
       )}

@@ -2,11 +2,18 @@
   "name": "smartseacrch",
   "version": "0.1.0",
   "private": true,
+  "description": "Lokale Suche in Handbüchern und Problembeschreibungen",
+  "author": "Dominik Senn",
+  "main": "./out/main/index.js",
   "scripts": {
-    "dev": "next dev --port 43217 --hostname 0.0.0.0",
-    "build": "next build",
-    "start": "next start --port 43217 --hostname 0.0.0.0",
-    "lint": "eslint"
+    "dev": "electron-vite dev",
+    "start": "electron-vite preview",
+    "build": "electron-vite build",
+    "dist": "electron-vite build && electron-builder",
+    "dist:win": "electron-vite build && electron-builder --win",
+    "dist:mac": "electron-vite build && electron-builder --mac",
+    "dist:linux": "electron-vite build && electron-builder --linux",
+    "lint": "tsc --noEmit"
   },
   "dependencies": {
     "class-variance-authority": "^0.7.1",
@@ -14,7 +21,6 @@
     "jszip": "^3.10.2",
     "lucide-react": "^1.48.0",
     "mammoth": "^1.12.3",
-    "next": "16.3.6",
     "radix-ui": "^1.6.7",
     "react": "19.2.8",
     "react-dom": "19.2.8",
@@ -23,14 +29,45 @@
     "unpdf": "^1.8.1"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4",
+    "@tailwindcss/vite": "^4.1.13",
     "@types/jszip": "^3.4.0",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@vitejs/plugin-react": "^4.7.0",
+    "electron": "^37.2.0",
+    "electron-builder": "^26.0.12",
+    "electron-vite": "^4.0.0",
     "eslint": "^9",
-    "eslint-config-next": "16.3.6",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vite": "^7.1.5"
+  },
+  "build": {
+    "appId": "app.smartseacrch.desktop",
+    "productName": "SmartSeacrch",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "out/**/*",
+      "package.json"
+    ],
+    "asar": true,
+    "linux": {
+      "target": ["AppImage", "dir"],
+      "category": "Office"
+    },
+    "win": {
+      "target": ["nsis", "portable"]
+    },
+    "mac": {
+      "target": ["dmg"],
+      "category": "public.app-category.productivity"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    }
   }
 }

@@ -8,8 +8,15 @@ export type SearchStore = {
   chunks: Chunk[];
 };
 
-const DATA_DIR = path.join(process.cwd(), ".data");
-const INDEX_PATH = path.join(DATA_DIR, "index.json");
+let dataDir = path.join(process.cwd(), ".data");
+
+export function setDataDir(dir: string): void {
+  dataDir = dir;
+}
+
+function indexPath(): string {
+  return path.join(dataDir, "index.json");
+}
 
 let writeTail: Promise<void> = Promise.resolve();
 
@@ -19,7 +26,7 @@ function emptyStore(): SearchStore {
 
 export async function loadStore(): Promise<SearchStore> {
   try {
-    const raw = await readFile(INDEX_PATH, "utf8");
+    const raw = await readFile(indexPath(), "utf8");
     const parsed = JSON.parse(raw) as SearchStore;
     if (!Array.isArray(parsed.documents) || !Array.isArray(parsed.chunks)) {
       return emptyStore();
@@ -31,10 +38,10 @@ export async function loadStore(): Promise<SearchStore> {
 }
 
 async function persist(store: SearchStore): Promise<void> {
-  await mkdir(DATA_DIR, { recursive: true });
-  const tmp = `${INDEX_PATH}.tmp`;
+  await mkdir(dataDir, { recursive: true });
+  const tmp = `${indexPath()}.tmp`;
   await writeFile(tmp, JSON.stringify(store), "utf8");
-  await rename(tmp, INDEX_PATH);
+  await rename(tmp, indexPath());
 }
 
 function withWriteLock<T>(fn: () => Promise<T>): Promise<T> {
