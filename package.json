@@ -59,11 +59,7 @@
       "target": ["AppImage", "dir"],
       "category": "Office",
       "icon": "resources/icon.png",
-      "executableName": "smartseacrch",
-      "desktop": {
-        "Name": "SmartSeacrch",
-        "Comment": "Lokale Suche in Handbüchern und Problembeschreibungen"
-      }
+      "executableName": "smartseacrch"
     },
     "win": {
       "target": ["nsis", "portable"]
