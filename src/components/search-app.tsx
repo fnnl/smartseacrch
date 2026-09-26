@@ -1,7 +1,7 @@
 "use client";
 
 import { MenuIcon } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import {
   ChatPanel,
@@ -47,6 +47,20 @@ export function SearchApp({
   const [asking, setAsking] = useState(false);
   const [turns, setTurns] = useState<ChatTurn[]>([]);
   const [libraryOpen, setLibraryOpen] = useState(false);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    void fetch("/api/library", { cache: "no-store", signal: controller.signal })
+      .then((response) => (response.ok ? response.json() : null))
+      .then((data: LibraryResponse | null) => {
+        if (!data) return;
+        setDocuments(data.documents);
+        setChunkCount(data.chunkCount);
+        setAnswerMode(data.answerMode);
+      })
+      .catch(() => undefined);
+    return () => controller.abort();
+  }, []);
 
   const applyLibrary = (data: LibraryResponse | IngestResponse) => {
     setDocuments(data.documents);
@@ -229,17 +243,29 @@ export function SearchApp({
         </main>
       </div>
 
-      <Sheet open={libraryOpen} onOpenChange={setLibraryOpen}>
-        <SheetContent side="left" className="w-[20rem] p-0 sm:max-w-none">
-          <SheetHeader className="sr-only">
-            <SheetTitle>Dokumente</SheetTitle>
-            <SheetDescription>
-              Dateien hochladen und die Bibliothek verwalten
-            </SheetDescription>
-          </SheetHeader>
-          {library}
-        </SheetContent>
-      </Sheet>
+      {libraryOpen ? (
+        <Sheet open onOpenChange={setLibraryOpen}>
+          <SheetContent side="left" className="w-[20rem] p-0 sm:max-w-none">
+            <SheetHeader className="sr-only">
+              <SheetTitle>Dokumente</SheetTitle>
+              <SheetDescription>
+                Dateien hochladen und die Bibliothek verwalten
+              </SheetDescription>
+            </SheetHeader>
+            <LibraryPanel
+              documents={documents}
+              chunkCount={chunkCount}
+              ingesting={ingesting}
+              skipped={skipped}
+              error={libraryError}
+              onUpload={ingest}
+              onLoadSample={loadSample}
+              onRemove={removeDocument}
+              onClear={clearLibrary}
+            />
+          </SheetContent>
+        </Sheet>
+      ) : null}
     </div>
   );
 }

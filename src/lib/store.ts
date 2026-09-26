@@ -1,4 +1,4 @@
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import path from "node:path";
 
 import type { Chunk, LibraryDocument } from "@/lib/types";
@@ -11,7 +11,6 @@ export type SearchStore = {
 const DATA_DIR = path.join(process.cwd(), ".data");
 const INDEX_PATH = path.join(DATA_DIR, "index.json");
 
-let memory: SearchStore | null = null;
 let writeTail: Promise<void> = Promise.resolve();
 
 function emptyStore(): SearchStore {
@@ -19,26 +18,23 @@ function emptyStore(): SearchStore {
 }
 
 export async function loadStore(): Promise<SearchStore> {
-  if (memory) return memory;
-
   try {
     const raw = await readFile(INDEX_PATH, "utf8");
     const parsed = JSON.parse(raw) as SearchStore;
     if (!Array.isArray(parsed.documents) || !Array.isArray(parsed.chunks)) {
-      memory = emptyStore();
-      return memory;
+      return emptyStore();
     }
-    memory = parsed;
-    return memory;
+    return parsed;
   } catch {
-    memory = emptyStore();
-    return memory;
+    return emptyStore();
   }
 }
 
 async function persist(store: SearchStore): Promise<void> {
   await mkdir(DATA_DIR, { recursive: true });
-  await writeFile(INDEX_PATH, JSON.stringify(store), "utf8");
+  const tmp = `${INDEX_PATH}.tmp`;
+  await writeFile(tmp, JSON.stringify(store), "utf8");
+  await rename(tmp, INDEX_PATH);
 }
 
 function withWriteLock<T>(fn: () => Promise<T>): Promise<T> {
@@ -77,7 +73,6 @@ export async function replaceDocuments(
       ],
     };
 
-    memory = next;
     await persist(next);
     return next;
   });
@@ -90,7 +85,6 @@ export async function removeDocument(documentId: string): Promise<SearchStore> {
       documents: store.documents.filter((doc) => doc.id !== documentId),
       chunks: store.chunks.filter((chunk) => chunk.documentId !== documentId),
     };
-    memory = next;
     await persist(next);
     return next;
   });
@@ -99,7 +93,6 @@ export async function removeDocument(documentId: string): Promise<SearchStore> {
 export async function clearStore(): Promise<SearchStore> {
   return withWriteLock(async () => {
     const next = emptyStore();
-    memory = next;
     await persist(next);
     return next;
   });

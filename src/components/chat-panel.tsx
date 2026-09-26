@@ -47,8 +47,8 @@ export function ChatPanel({
     endRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
   }, [turns, asking]);
 
-  const submit = async () => {
-    const question = draft.trim();
+  const submitFrom = async (raw: string) => {
+    const question = raw.trim();
     if (!question || asking || documentCount === 0) return;
     setDraft("");
     await onAsk(question);
@@ -74,7 +74,11 @@ export function ChatPanel({
 
       <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4 md:px-6">
         {turns.length === 0 ? (
-          <EmptyChat documentCount={documentCount} onPick={setDraft} />
+          <EmptyChat
+            documentCount={documentCount}
+            asking={asking}
+            onAsk={(question) => void submitFrom(question)}
+          />
         ) : (
           <ol className="space-y-5">
             {turns.map((turn) => (
@@ -112,17 +116,21 @@ export function ChatPanel({
         className="border-t px-3 py-3 md:px-6"
         onSubmit={(event) => {
           event.preventDefault();
-          void submit();
+          const form = event.currentTarget;
+          const typed = new FormData(form).get("question");
+          const fromField = typeof typed === "string" ? typed : draft;
+          void submitFrom(fromField);
         }}
       >
         <div className="flex items-end gap-2">
           <Textarea
+            name="question"
             value={draft}
             onChange={(event) => setDraft(event.target.value)}
             onKeyDown={(event) => {
               if (event.key === "Enter" && !event.shiftKey) {
                 event.preventDefault();
-                void submit();
+                void submitFrom(event.currentTarget.value);
               }
             }}
             placeholder={
@@ -137,7 +145,7 @@ export function ChatPanel({
           <Button
             type="submit"
             size="icon-lg"
-            disabled={asking || documentCount === 0 || !draft.trim()}
+            disabled={asking || documentCount === 0}
             aria-label="Frage senden"
           >
             {asking ? (
@@ -157,10 +165,12 @@ export function ChatPanel({
 
 function EmptyChat({
   documentCount,
-  onPick,
+  asking,
+  onAsk,
 }: {
   documentCount: number;
-  onPick: (value: string) => void;
+  asking: boolean;
+  onAsk: (value: string) => void;
 }) {
   return (
     <div className="mx-auto flex max-w-lg flex-col items-start gap-4 py-8">
@@ -185,8 +195,9 @@ function EmptyChat({
             <button
               key={example}
               type="button"
-              className="hover:bg-muted rounded-full border px-3 py-1.5 text-left text-sm transition-colors"
-              onClick={() => onPick(example)}
+              disabled={asking}
+              className="hover:bg-muted rounded-full border px-3 py-1.5 text-left text-sm transition-colors disabled:opacity-50"
+              onClick={() => onAsk(example)}
             >
               {example}
             </button>
