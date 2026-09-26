@@ -31,12 +31,16 @@ type SearchAppProps = {
   initialDocuments: LibraryDocument[];
   initialChunkCount: number;
   initialAnswerMode: AnswerMode;
+  initialQuestion?: string;
+  initialAnswer?: AskResponse | null;
 };
 
 export function SearchApp({
   initialDocuments,
   initialChunkCount,
   initialAnswerMode,
+  initialQuestion = "",
+  initialAnswer = null,
 }: SearchAppProps) {
   const [documents, setDocuments] = useState(initialDocuments);
   const [chunkCount, setChunkCount] = useState(initialChunkCount);
@@ -45,7 +49,11 @@ export function SearchApp({
   const [libraryError, setLibraryError] = useState<string | null>(null);
   const [ingesting, setIngesting] = useState(false);
   const [asking, setAsking] = useState(false);
-  const [turns, setTurns] = useState<ChatTurn[]>([]);
+  const [turns, setTurns] = useState<ChatTurn[]>(() =>
+    initialQuestion && initialAnswer
+      ? [{ id: "query", question: initialQuestion, ...initialAnswer }]
+      : [],
+  );
   const [libraryOpen, setLibraryOpen] = useState(false);
 
   useEffect(() => {
@@ -170,6 +178,11 @@ export function SearchApp({
       setTurns((current) =>
         current.map((turn) => (turn.id === pendingId ? { ...next, id: pendingId } : turn)),
       );
+      if (typeof window !== "undefined") {
+        const url = new URL(window.location.href);
+        url.searchParams.set("question", question);
+        window.history.replaceState(null, "", url);
+      }
     } catch {
       setTurns((current) =>
         current.map((turn) =>

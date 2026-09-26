@@ -113,6 +113,8 @@ export function ChatPanel({
       </div>
 
       <form
+        method="get"
+        action="/"
         className="border-t px-3 py-3 md:px-6"
         onSubmit={(event) => {
           event.preventDefault();
@@ -192,15 +194,17 @@ function EmptyChat({
       {documentCount > 0 && (
         <div className="flex flex-wrap gap-2">
           {EXAMPLES.map((example) => (
-            <button
+            <a
               key={example}
-              type="button"
-              disabled={asking}
-              className="hover:bg-muted rounded-full border px-3 py-1.5 text-left text-sm transition-colors disabled:opacity-50"
-              onClick={() => onAsk(example)}
+              href={`/?question=${encodeURIComponent(example)}`}
+              className={`hover:bg-muted rounded-full border px-3 py-1.5 text-left text-sm transition-colors ${asking ? "pointer-events-none opacity-50" : ""}`}
+              onClick={(event) => {
+                event.preventDefault();
+                onAsk(example);
+              }}
             >
               {example}
-            </button>
+            </a>
           ))}
         </div>
       )}
