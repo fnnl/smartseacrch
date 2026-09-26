@@ -62,7 +62,13 @@
       "executableName": "smartseacrch"
     },
     "win": {
-      "target": ["nsis", "portable"]
+      "icon": "resources/icon.ico",
+      "target": [
+        { "target": "nsis", "arch": ["x64"] },
+        { "target": "portable", "arch": ["x64"] },
+        { "target": "zip", "arch": ["x64"] }
+      ],
+      "verifyUpdateCodeSignature": false
     },
     "mac": {
       "target": ["dmg"],
@@ -70,7 +76,15 @@
     },
     "nsis": {
       "oneClick": false,
-      "allowToChangeInstallationDirectory": true
+      "allowToChangeInstallationDirectory": true,
+      "artifactName": "${productName}-Setup-${version}.exe",
+      "shortcutName": "SmartSeacrch",
+      "uninstallDisplayName": "SmartSeacrch",
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
+    },
+    "portable": {
+      "artifactName": "${productName}-Portable-${version}.exe"
     }
   }
 }
