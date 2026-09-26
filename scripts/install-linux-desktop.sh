@@ -6,7 +6,8 @@ APP_HOME="${XDG_DATA_HOME:-$HOME/.local/share}/smartseacrch"
 APP_BIN="$APP_HOME/smartseacrch"
 DESKTOP_DIR="${XDG_DESKTOP_DIR:-$HOME/Desktop}"
 APPLICATIONS_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/applications"
-ICON_DST="$APP_HOME/icon.png"
+ICON_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/icons/hicolor/512x512/apps"
+ICON_DST="$ICON_DIR/smartseacrch.png"
 
 cd "$ROOT"
 
@@ -16,11 +17,13 @@ if [[ ! -x "$ROOT/release/linux-unpacked/smartseacrch" ]]; then
   npx electron-builder --linux dir
 fi
 
-mkdir -p "$APP_HOME" "$APPLICATIONS_DIR" "$DESKTOP_DIR"
+mkdir -p "$APP_HOME" "$APPLICATIONS_DIR" "$DESKTOP_DIR" "$ICON_DIR" \
+  "${XDG_DATA_HOME:-$HOME/.local/share}/pixmaps"
 rm -rf "$APP_HOME"
 mkdir -p "$APP_HOME"
 cp -a "$ROOT/release/linux-unpacked/." "$APP_HOME/"
 cp -f "$ROOT/resources/icon.png" "$ICON_DST"
+cp -f "$ROOT/resources/icon.png" "${XDG_DATA_HOME:-$HOME/.local/share}/pixmaps/smartseacrch.png"
 
 # Flags that this VM (and similar locked-down Linux desktops) need.
 EXTRA_FLAGS="--no-sandbox --disable-gpu --disable-dev-shm-usage"
@@ -32,7 +35,7 @@ Version=1.0
 Name=SmartSeacrch
 Comment=Lokale Suche in Handbüchern und Problembeschreibungen
 Exec=$APP_BIN $EXTRA_FLAGS
-Icon=$ICON_DST
+Icon=smartseacrch
 Terminal=false
 Categories=Office;Utility;
 StartupWMClass=smartseacrch
