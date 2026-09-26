@@ -2,6 +2,8 @@
 
 Lokales Programm für Fragen an Handbücher und Problembeschreibungen. Kein Webserver, kein Upload in die Cloud: jede Person startet die App auf ihrem Rechner und wählt den Ordner mit den Word-Dateien.
 
+Repository: https://github.com/fnnl/smartseacrch
+
 ## Für Kolleginnen und Kollegen
 
 1. Node.js 22 oder neuer installieren: https://nodejs.org
