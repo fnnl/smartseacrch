@@ -22,6 +22,15 @@ npm install
 npm run dist
 ```
 
+Unter Linux die App ins Anwendungsmenü und auf den Desktop legen:
+
+```bash
+npm install
+npm run install:desktop
+```
+
+Danach «SmartSeacrch» doppelklicken.
+
 Die Dateien liegen danach in `release/`:
 
 - Windows: Installer (NSIS) oder portable `.exe`

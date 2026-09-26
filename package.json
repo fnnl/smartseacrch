@@ -13,6 +13,7 @@
     "dist:win": "electron-vite build && electron-builder --win",
     "dist:mac": "electron-vite build && electron-builder --mac",
     "dist:linux": "electron-vite build && electron-builder --linux",
+    "install:desktop": "bash scripts/install-linux-desktop.sh",
     "lint": "tsc --noEmit"
   },
   "dependencies": {
@@ -56,7 +57,13 @@
     "asar": true,
     "linux": {
       "target": ["AppImage", "dir"],
-      "category": "Office"
+      "category": "Office",
+      "icon": "resources/icon.png",
+      "executableName": "smartseacrch",
+      "desktop": {
+        "Name": "SmartSeacrch",
+        "Comment": "Lokale Suche in Handbüchern und Problembeschreibungen"
+      }
     },
     "win": {
       "target": ["nsis", "portable"]
