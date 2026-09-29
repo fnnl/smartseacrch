@@ -2,6 +2,12 @@ import { app, BrowserWindow, dialog, ipcMain } from "electron";
 import path from "node:path";
 
 import { answerQuestion } from "@/lib/answer";
+import {
+  clearLogo,
+  loadBranding,
+  saveLogoFromPath,
+  setBrandingDir,
+} from "@/lib/branding";
 import { filesFromPaths } from "@/lib/from-disk";
 import { ingestIncomingFiles } from "@/lib/ingest";
 import { buildSampleFiles } from "@/lib/sample-docs";
@@ -9,7 +15,6 @@ import {
   clearStore,
   configuredAnswerMode,
   loadStore,
-  removeDocument,
   setDataDir,
 } from "@/lib/store";
 import type { IngestResponse, LibraryResponse } from "@/lib/types";
@@ -26,10 +31,10 @@ function libraryFromStore(
 
 async function createWindow(): Promise<void> {
   const window = new BrowserWindow({
-    width: 1220,
-    height: 800,
-    minWidth: 720,
-    minHeight: 560,
+    width: 1360,
+    height: 900,
+    minWidth: 860,
+    minHeight: 640,
     title: "SmartSeacrch",
     autoHideMenuBar: true,
     webPreferences: {
@@ -49,10 +54,6 @@ async function createWindow(): Promise<void> {
 
 function registerIpc(): void {
   ipcMain.handle("library:get", async () => libraryFromStore(await loadStore()));
-
-  ipcMain.handle("library:remove", async (_event, id: string) =>
-    libraryFromStore(await removeDocument(id)),
-  );
 
   ipcMain.handle("library:clear", async () =>
     libraryFromStore(await clearStore()),
@@ -111,6 +112,25 @@ function registerIpc(): void {
     );
   });
 
+  ipcMain.handle("branding:get", async () => loadBranding());
+
+  ipcMain.handle("branding:pick", async () => {
+    const picked = await dialog.showOpenDialog({
+      title: "Firmenlogo wählen",
+      properties: ["openFile"],
+      filters: [
+        {
+          name: "Bilder",
+          extensions: ["png", "jpg", "jpeg", "webp", "gif", "svg"],
+        },
+      ],
+    });
+    if (picked.canceled || !picked.filePaths[0]) return null;
+    return saveLogoFromPath(picked.filePaths[0]);
+  });
+
+  ipcMain.handle("branding:clear", async () => clearLogo());
+
   ipcMain.handle("ask", async (_event, question: string) => {
     const trimmed = question.trim();
     if (!trimmed) {
@@ -120,7 +140,7 @@ function registerIpc(): void {
     if (!store.chunks.length) {
       return {
         error:
-          "Es sind noch keine Dokumente indexiert. Wähle zuerst Dateien oder einen Ordner.",
+          "Es sind noch keine Unterlagen indexiert. Wähle zuerst Dateien oder einen Ordner.",
       };
     }
     return answerQuestion(store.chunks, trimmed);
@@ -128,7 +148,9 @@ function registerIpc(): void {
 }
 
 app.whenReady().then(async () => {
-  setDataDir(path.join(app.getPath("userData"), "data"));
+  const dataDir = path.join(app.getPath("userData"), "data");
+  setDataDir(dataDir);
+  setBrandingDir(dataDir);
   registerIpc();
   await createWindow();
 

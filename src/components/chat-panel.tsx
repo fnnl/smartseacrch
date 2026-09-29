@@ -19,7 +19,7 @@ export type ChatTurn = {
 
 type ChatPanelProps = {
   turns: ChatTurn[];
-  documentCount: number;
+  ready: boolean;
   answerMode: AnswerMode;
   asking: boolean;
   onAsk: (question: string) => Promise<void>;
@@ -33,7 +33,7 @@ const EXAMPLES = [
 
 export function ChatPanel({
   turns,
-  documentCount,
+  ready,
   answerMode,
   asking,
   onAsk,
@@ -47,55 +47,55 @@ export function ChatPanel({
 
   const submitFrom = async (raw: string) => {
     const question = raw.trim();
-    if (!question || asking || documentCount === 0) return;
+    if (!question || asking || !ready) return;
     setDraft("");
     await onAsk(question);
   };
 
   return (
     <div className="flex h-full min-h-0 flex-col">
-      <div className="flex items-start justify-between gap-3 border-b px-4 py-3 md:px-6">
-        <div>
-          <h2 className="font-heading text-lg">Fragen</h2>
-          <p className="text-sm text-muted-foreground">
-            {documentCount === 0
-              ? "Sobald Dokumente indexiert sind, kannst du nach Fehlern, Schritten und Teilen fragen."
-              : "Die Antwort zeigt die Datei und die Stelle, aus der sie stammt."}
+      <div className="flex items-start justify-between gap-4 px-7 pt-6 pb-2 md:px-10">
+        <div className="max-w-2xl">
+          <h2 className="font-heading text-xl tracking-tight">Fragen</h2>
+          <p className="mt-1.5 text-[0.95rem] leading-7 text-muted-foreground">
+            {ready
+              ? "Die Antwort zeigt die Stelle, aus der sie stammt."
+              : "Sobald Unterlagen indexiert sind, kannst du nach Fehlern, Schritten und Teilen fragen."}
           </p>
         </div>
         <Badge variant="outline" className="hidden shrink-0 sm:inline-flex">
           {answerMode === "generative"
             ? "Sprachmodell bereit"
-            : "Antworten aus Dokumentstellen"}
+            : "Antworten aus den Unterlagen"}
         </Badge>
       </div>
 
-      <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4 md:px-6">
+      <div className="min-h-0 flex-1 overflow-y-auto px-7 py-6 md:px-10">
         {turns.length === 0 ? (
           <EmptyChat
-            documentCount={documentCount}
+            ready={ready}
             asking={asking}
             onAsk={(question) => void submitFrom(question)}
           />
         ) : (
-          <ol className="space-y-5">
+          <ol className="space-y-8">
             {turns.map((turn) => (
-              <li key={turn.id} className="space-y-3">
+              <li key={turn.id} className="space-y-4">
                 <div className="flex justify-end">
-                  <p className="bg-primary text-primary-foreground max-w-[40rem] rounded-2xl rounded-br-md px-3.5 py-2 text-sm leading-6">
+                  <p className="bg-primary text-primary-foreground max-w-[40rem] rounded-3xl rounded-br-lg px-4 py-3 text-[0.95rem] leading-7">
                     {turn.question}
                   </p>
                 </div>
                 {turn.pending ? (
-                  <div className="bg-card ring-foreground/8 max-w-[46rem] rounded-2xl rounded-bl-md px-4 py-3 ring-1">
+                  <div className="bg-muted/50 max-w-[46rem] rounded-3xl rounded-bl-lg px-5 py-4">
                     <p className="text-muted-foreground flex items-center gap-2 text-sm">
                       <LoaderCircleIcon className="size-4 animate-spin" />
-                      Suche in den Dokumenten…
+                      Suche in den Unterlagen…
                     </p>
                   </div>
                 ) : turn.error ? (
                   <div
-                    className="border-destructive/30 bg-destructive/5 text-destructive max-w-[46rem] rounded-2xl px-4 py-3 text-sm"
+                    className="border-destructive/30 bg-destructive/5 text-destructive max-w-[46rem] rounded-3xl px-5 py-4 text-sm leading-6"
                     role="alert"
                   >
                     {turn.error}
@@ -111,13 +111,13 @@ export function ChatPanel({
       </div>
 
       <form
-        className="border-t px-3 py-3 md:px-6"
+        className="px-7 pb-6 pt-2 md:px-10"
         onSubmit={(event) => {
           event.preventDefault();
           void submitFrom(draft);
         }}
       >
-        <div className="flex items-end gap-2">
+        <div className="flex items-end gap-3">
           <Textarea
             name="question"
             value={draft}
@@ -129,18 +129,19 @@ export function ChatPanel({
               }
             }}
             placeholder={
-              documentCount === 0
-                ? "Zuerst Dokumente laden…"
-                : "Frage stellen, z. B. Was bedeutet Fehler E12?"
+              ready
+                ? "Frage stellen, z. B. Was bedeutet Fehler E12?"
+                : "Zuerst Unterlagen laden…"
             }
-            disabled={asking || documentCount === 0}
+            disabled={asking || !ready}
             aria-label="Frage"
-            className="min-h-[52px] max-h-40 flex-1 resize-none"
+            className="min-h-[76px] max-h-48 flex-1 resize-none rounded-2xl px-4 py-3 text-base"
           />
           <Button
             type="submit"
             size="icon-lg"
-            disabled={asking || documentCount === 0}
+            className="mb-1 size-12 rounded-2xl"
+            disabled={asking || !ready}
             aria-label="Frage senden"
           >
             {asking ? (
@@ -150,7 +151,7 @@ export function ChatPanel({
             )}
           </Button>
         </div>
-        <p className="text-muted-foreground mt-2 text-xs">
+        <p className="text-muted-foreground mt-3 text-xs leading-5">
           Eingabe sendet, Umschalt+Eingabe macht eine neue Zeile.
         </p>
       </form>
@@ -159,78 +160,84 @@ export function ChatPanel({
 }
 
 function EmptyChat({
-  documentCount,
+  ready,
   asking,
   onAsk,
 }: {
-  documentCount: number;
+  ready: boolean;
   asking: boolean;
   onAsk: (value: string) => void;
 }) {
   return (
-    <div className="mx-auto flex max-w-lg flex-col items-start gap-4 py-8">
-      <div className="bg-primary/8 text-primary flex size-10 items-center justify-center rounded-2xl">
-        <BookOpenIcon className="size-5" />
+    <div className="mx-auto flex max-w-xl flex-col items-start gap-6 py-10">
+      <div className="bg-primary/10 text-primary flex size-12 items-center justify-center rounded-2xl">
+        <BookOpenIcon className="size-6" />
       </div>
       <div>
-        <p className="font-heading text-xl">
-          {documentCount === 0
-            ? "Lade zuerst deine Unterlagen"
-            : "Frag, als würdest du im Ordner blättern"}
+        <p className="font-heading text-2xl tracking-tight">
+          {ready
+            ? "Frag, als würdest du im Ordner blättern"
+            : "Lade zuerst deine Unterlagen"}
         </p>
-        <p className="mt-2 text-sm leading-6 text-muted-foreground">
-          {documentCount === 0
-            ? "Word-Dateien, PDFs und Texte aus einem Ordner mit Problembeschreibungen und Handbüchern. Danach reicht eine normale Frage."
-            : `${documentCount} ${documentCount === 1 ? "Datei ist" : "Dateien sind"} bereit. Die Antwort bleibt an der Quelle kleben.`}
+        <p className="mt-3 text-[0.95rem] leading-7 text-muted-foreground">
+          {ready
+            ? "Eine normale Frage reicht. Die Antwort bleibt an der Quelle kleben."
+            : "Wähle den Ordner mit Problembeschreibungen und Handbüchern. Danach reicht eine normale Frage."}
         </p>
       </div>
-      {documentCount > 0 && (
-        <div className="flex flex-wrap gap-2">
+      {ready ? (
+        <div className="flex flex-wrap gap-2.5">
           {EXAMPLES.map((example) => (
             <button
               key={example}
               type="button"
               disabled={asking}
-              className="hover:bg-muted rounded-full border px-3 py-1.5 text-left text-sm transition-colors disabled:opacity-50"
+              className="hover:bg-muted rounded-full border px-4 py-2 text-left text-sm leading-6 transition-colors disabled:opacity-50"
               onClick={() => onAsk(example)}
             >
               {example}
             </button>
           ))}
         </div>
-      )}
+      ) : null}
     </div>
   );
 }
 
 function AnswerCard({ turn }: { turn: ChatTurn }) {
   return (
-    <article className="bg-card ring-foreground/8 max-w-[46rem] rounded-2xl rounded-bl-md px-4 py-3 ring-1">
-      <div className="mb-2 flex flex-wrap items-center gap-2">
+    <article className="bg-muted/40 max-w-[46rem] rounded-3xl rounded-bl-lg px-5 py-4">
+      <div className="mb-3 flex flex-wrap items-center gap-2">
         <Badge variant="secondary">
           {turn.mode === "generative"
             ? "Formuliert mit Sprachmodell"
-            : "Auszug aus den Dokumenten"}
+            : "Auszug aus den Unterlagen"}
         </Badge>
       </div>
-      <p className="text-[0.95rem] leading-7 whitespace-pre-wrap">
+      <p className="text-[1.02rem] leading-8 whitespace-pre-wrap">
         {turn.answer}
       </p>
-      {turn.fallbackReason && (
-        <p className="text-muted-foreground mt-2 text-xs">{turn.fallbackReason}</p>
-      )}
-      {turn.sources && turn.sources.length > 0 && (
-        <div className="mt-4 border-t pt-3">
-          <p className="text-xs font-medium tracking-[0.12em] text-muted-foreground uppercase">
+      {turn.fallbackReason ? (
+        <p className="text-muted-foreground mt-3 text-xs leading-5">
+          {turn.fallbackReason}
+        </p>
+      ) : null}
+      {turn.sources && turn.sources.length > 0 ? (
+        <div className="mt-5 border-t border-border/70 pt-4">
+          <p className="text-xs font-medium tracking-[0.14em] text-muted-foreground uppercase">
             Quellen
           </p>
-          <ol className="mt-2 space-y-2">
+          <ol className="mt-3 space-y-3">
             {turn.sources.map((source, index) => (
-              <SourceRow key={`${source.documentId}-${source.chunkIndex}`} source={source} index={index} />
+              <SourceRow
+                key={`${source.documentId}-${source.chunkIndex}`}
+                source={source}
+                index={index}
+              />
             ))}
           </ol>
         </div>
-      )}
+      ) : null}
     </article>
   );
 }
@@ -239,30 +246,37 @@ function SourceRow({ source, index }: { source: SourceHit; index: number }) {
   const [open, setOpen] = useState(index === 0);
 
   return (
-    <li className="bg-muted/60 rounded-xl px-3 py-2">
+    <li className="bg-card/80 rounded-2xl px-4 py-3">
       <button
         type="button"
-        className="flex w-full items-start justify-between gap-3 text-left"
+        className="flex w-full items-start justify-between gap-4 text-left"
         onClick={() => setOpen((value) => !value)}
         aria-expanded={open}
       >
-        <span className="text-sm font-medium">
-          {index + 1}. {source.displayPath}
+        <span className="text-sm leading-6 font-medium">
+          {index + 1}. {source.fileName}
+          <span className="text-muted-foreground font-normal">
+            {" "}
+            · Stelle {source.chunkIndex + 1}
+          </span>
         </span>
         <span className="text-muted-foreground text-xs">
-          Stelle {source.chunkIndex + 1}
+          {open ? "Passage schließen" : "Passage zeigen"}
         </span>
       </button>
-      {open && (
-        <blockquote className="text-muted-foreground mt-2 border-l-2 border-primary/40 pl-3 text-sm leading-6">
+      {open ? (
+        <blockquote className="text-muted-foreground mt-2 border-l-2 border-primary/40 pl-3 text-sm leading-7">
           {source.passage}
         </blockquote>
-      )}
+      ) : null}
     </li>
   );
 }
 
-export function turnFromResponse(question: string, response: AskResponse): ChatTurn {
+export function turnFromResponse(
+  question: string,
+  response: AskResponse,
+): ChatTurn {
   return {
     id: crypto.randomUUID(),
     question,

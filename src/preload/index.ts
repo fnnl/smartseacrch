@@ -1,5 +1,6 @@
 import { contextBridge, ipcRenderer, webUtils } from "electron";
 
+import type { Branding } from "@/lib/branding";
 import type {
   AskResponse,
   IngestResponse,
@@ -12,8 +13,10 @@ export type SmartsearchApi = {
   pickFolder: () => Promise<IngestResponse | null>;
   ingestPaths: (paths: string[]) => Promise<IngestResponse>;
   loadSample: () => Promise<IngestResponse>;
-  remove: (id: string) => Promise<LibraryResponse>;
   clear: () => Promise<LibraryResponse>;
+  getBranding: () => Promise<Branding>;
+  pickLogo: () => Promise<Branding | null>;
+  clearLogo: () => Promise<Branding>;
   ask: (
     question: string,
   ) => Promise<AskResponse & { error?: string }>;
@@ -26,8 +29,10 @@ const api: SmartsearchApi = {
   pickFolder: () => ipcRenderer.invoke("ingest:pick-folder"),
   ingestPaths: (paths) => ipcRenderer.invoke("ingest:paths", paths),
   loadSample: () => ipcRenderer.invoke("ingest:sample"),
-  remove: (id) => ipcRenderer.invoke("library:remove", id),
   clear: () => ipcRenderer.invoke("library:clear"),
+  getBranding: () => ipcRenderer.invoke("branding:get"),
+  pickLogo: () => ipcRenderer.invoke("branding:pick"),
+  clearLogo: () => ipcRenderer.invoke("branding:clear"),
   ask: (question) => ipcRenderer.invoke("ask", question),
   pathForFile: (file) => webUtils.getPathForFile(file),
 };

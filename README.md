@@ -25,9 +25,10 @@ Node.js, Internet und ein Server sind nicht nötig. Der Index bleibt auf diesem 
 
 ## Bedienung
 
-1. **Ordner** oder **Dateien** wählen — Word (`.docx`), PDF, Text
-2. Eine Frage stellen, z. B. «Was bedeutet Fehler E12?»
-3. Die Antwort nennt Datei und Stelle
+1. **Ordner** oder **Dateien** wählen — Word (`.docx`), PDF, Text. Importierte Dateien erscheinen nicht als Liste.
+2. Optional **Firmenlogo** wählen — bleibt auf diesem Rechner.
+3. Eine Frage stellen, z. B. «Was bedeutet Fehler E12?»
+4. Die Antwort nennt Datei und Stelle
 
 «Beispiel laden» legt ein kurzes KV-400-Handbuch in den Index, zum Ausprobieren.
 
