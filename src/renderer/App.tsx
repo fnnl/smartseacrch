@@ -107,8 +107,22 @@ export function App() {
   };
 
   return (
-    <div className="flex h-dvh min-h-0 flex-col overflow-hidden">
-      <header className="px-6 pt-7 pb-2 md:px-10">
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        height: "100%",
+        maxHeight: "100%",
+        minHeight: 0,
+        overflow: "hidden",
+      }}
+    >
+      <header
+        style={{
+          flex: "0 0 auto",
+          padding: "24px 40px 8px",
+        }}
+      >
         <div className="flex items-start justify-between gap-6">
           <div className="flex min-w-0 items-center gap-4">
             {logoDataUrl ? (
@@ -184,8 +198,30 @@ export function App() {
         />
       </header>
 
-      <main className="flex min-h-0 flex-1 px-6 pb-6 pt-4 md:px-10">
-        <div className="bg-card ring-foreground/6 grid h-full min-h-0 min-w-0 flex-1 grid-rows-1 rounded-[1.75rem] ring-1">
+      <main
+        style={{
+          flex: "1 1 0%",
+          minHeight: 0,
+          minWidth: 0,
+          display: "flex",
+          flexDirection: "column",
+          overflow: "hidden",
+          padding: "8px 24px 0",
+        }}
+      >
+        <div
+          style={{
+            flex: "1 1 0%",
+            minHeight: 0,
+            minWidth: 0,
+            display: "flex",
+            flexDirection: "column",
+            overflow: "hidden",
+            background: "var(--card)",
+            borderRadius: "1.75rem 1.75rem 0 0",
+            boxShadow: "inset 0 0 0 1px color-mix(in oklab, var(--foreground) 6%, transparent)",
+          }}
+        >
           <ChatPanel
             turns={turns}
             ready={ready}

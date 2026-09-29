@@ -38,10 +38,12 @@ export function ChatPanel({
   onAsk,
 }: ChatPanelProps) {
   const [draft, setDraft] = useState("");
-  const endRef = useRef<HTMLDivElement>(null);
+  const listRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    endRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+    const node = listRef.current;
+    if (!node) return;
+    node.scrollTop = node.scrollHeight;
   }, [turns, asking]);
 
   const submitFrom = async (raw: string) => {
@@ -54,8 +56,27 @@ export function ChatPanel({
   const canSend = ready && !asking && draft.trim().length > 0;
 
   return (
-    <div className="grid h-full min-h-0 grid-rows-[auto_minmax(0,1fr)_auto]">
-      <div className="flex items-start justify-between gap-4 px-8 pt-6 pb-2 md:px-12">
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        flex: "1 1 0%",
+        height: "100%",
+        minHeight: 0,
+        minWidth: 0,
+        overflow: "hidden",
+      }}
+    >
+      <div
+        style={{
+          flex: "0 0 auto",
+          display: "flex",
+          alignItems: "flex-start",
+          justifyContent: "space-between",
+          gap: 16,
+          padding: "20px 32px 8px",
+        }}
+      >
         <div className="max-w-2xl">
           <h2 className="font-heading text-xl tracking-tight">Fragen</h2>
           <p className="mt-1.5 text-[0.95rem] leading-7 text-muted-foreground">
@@ -71,7 +92,17 @@ export function ChatPanel({
         </Badge>
       </div>
 
-      <div className="h-full min-h-0 overflow-y-auto px-8 py-6 md:px-12">
+      <div
+        ref={listRef}
+        style={{
+          flex: "1 1 0%",
+          minHeight: 0,
+          overflowX: "hidden",
+          overflowY: "auto",
+          scrollbarGutter: "stable",
+          padding: "8px 32px 16px",
+        }}
+      >
         {turns.length === 0 ? (
           <EmptyChat
             ready={ready}
@@ -108,15 +139,18 @@ export function ChatPanel({
             ))}
           </ol>
         )}
-        <div ref={endRef} />
       </div>
 
       <form
+        data-question-composer="true"
         style={{
-          flexShrink: 0,
+          flex: "0 0 auto",
+          position: "sticky",
+          bottom: 0,
+          zIndex: 3,
           background: "#e7f1f0",
           borderTop: "1px solid #b7d0cd",
-          padding: "18px 32px 20px",
+          padding: "16px 32px 20px",
         }}
         onSubmit={(event) => {
           event.preventDefault();
