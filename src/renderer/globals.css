@@ -95,4 +95,16 @@
   body {
     @apply bg-background text-foreground font-sans;
   }
+  .question-input::placeholder {
+    color: #475569;
+    opacity: 1;
+  }
+  .question-input:disabled::placeholder {
+    color: #64748b;
+    opacity: 1;
+  }
+  .question-input:focus {
+    border-color: #0f766e;
+    box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.22);
+  }
 }

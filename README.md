@@ -12,7 +12,7 @@ Fertige Dateien: https://github.com/fnnl/smartseacrch/releases/latest
    - **SmartSeacrch-Setup-0.1.0.exe** — Installation mit Verknüpfung im Startmenü und auf dem Desktop
    - **SmartSeacrch-Portable-0.1.0.exe** — eine Datei kopieren, nicht installieren (USB-Stick oder Ordner)
 2. Doppelklicken. Erscheint eine Windows-Warnung («Unbekannter Herausgeber»): **Weitere Informationen** → **Trotzdem ausführen**
-3. In der App **Ordner** oder **Dateien** wählen, dann eine Frage stellen
+3. In der App **Ordner wählen** oder **Dateien wählen**, dann unten eine Frage eintippen
 
 SHA-256 (v0.1.0):
 
@@ -25,9 +25,9 @@ Node.js, Internet und ein Server sind nicht nötig. Der Index bleibt auf diesem 
 
 ## Bedienung
 
-1. **Ordner** oder **Dateien** wählen — Word (`.docx`), PDF, Text. Importierte Dateien erscheinen nicht als Liste.
-2. Optional **Firmenlogo** wählen — bleibt auf diesem Rechner.
-3. Eine Frage stellen, z. B. «Was bedeutet Fehler E12?»
+1. **Ordner wählen** oder **Dateien wählen** — Word (`.docx`), PDF, Text. Importierte Dateien erscheinen nicht als Liste.
+2. Optional **Firmenlogo wählen** — bleibt auf diesem Rechner.
+3. Unten ins Feld **Deine Frage** schreiben, z. B. «Was bedeutet Fehler E12?», dann **Frage senden**.
 4. Die Antwort nennt Datei und Stelle
 
 «Beispiel laden» legt ein kurzes KV-400-Handbuch in den Index, zum Ausprobieren.

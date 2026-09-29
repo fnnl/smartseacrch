@@ -8,7 +8,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 
-import { Button } from "@/components/ui/button";
+import { ActionButton } from "@/components/action-button";
 
 type WorkspaceBarProps = {
   ready: boolean;
@@ -43,14 +43,18 @@ export function WorkspaceBar({
   const [confirmClear, setConfirmClear] = useState(false);
 
   return (
-    <div className="mt-6 space-y-4">
+    <div style={{ marginTop: 24, display: "flex", flexDirection: "column", gap: 16 }}>
       <div
-        style={{ display: "flex", flexDirection: "column", gap: 20 }}
-        className={`w-full rounded-3xl border px-6 py-5 transition-colors ${
-          dragging
-            ? "border-primary bg-primary/8"
-            : "border-border/80 bg-card/80"
-        }`}
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: 16,
+          width: "100%",
+          borderRadius: 20,
+          border: dragging ? "2px dashed #0f766e" : "2px dashed #94a3b8",
+          background: dragging ? "#ccfbf1" : "#ffffff",
+          padding: "20px 24px",
+        }}
         onDragEnter={(event) => {
           event.preventDefault();
           setDragging(true);
@@ -72,119 +76,144 @@ export function WorkspaceBar({
           if (paths.length) void onDropPaths(paths);
         }}
       >
-        <p className="max-w-3xl text-[0.95rem] leading-7 text-muted-foreground">
-          Ordner oder Dateien von diesem Rechner wählen. SmartSeacrch liest{" "}
-          <span className="text-foreground font-medium">Word</span>,{" "}
-          <span className="text-foreground font-medium">PDF</span> und{" "}
-          <span className="text-foreground font-medium">Text</span> lokal —
-          nichts geht ins Netz.
-        </p>
+        <div>
+          <p
+            style={{
+              margin: 0,
+              fontSize: 16,
+              fontWeight: 700,
+              color: "#0f172a",
+            }}
+          >
+            Unterlagen hinzufügen
+          </p>
+          <p
+            style={{
+              margin: "6px 0 0",
+              fontSize: 14,
+              lineHeight: 1.55,
+              color: "#475569",
+              maxWidth: 720,
+            }}
+          >
+            Ordner oder Dateien von diesem Rechner wählen. SmartSeacrch liest
+            Word, PDF und Text lokal — nichts geht ins Netz. Dateien hierher
+            ziehen geht auch.
+          </p>
+        </div>
         <div
-          style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 12 }}
+          style={{
+            display: "flex",
+            flexWrap: "wrap",
+            alignItems: "center",
+            gap: 12,
+          }}
         >
-          <button
-            type="button"
+          <ActionButton
+            variant="filled"
             disabled={ingesting}
             onClick={() => void onPickFolder()}
-            className="bg-primary text-primary-foreground inline-flex h-11 shrink-0 items-center gap-2 rounded-xl px-4 text-sm font-medium disabled:opacity-50"
           >
-            <FolderOpenIcon className="size-4" />
+            <FolderOpenIcon style={{ width: 18, height: 18 }} />
             Ordner wählen
-          </button>
-          <button
-            type="button"
+          </ActionButton>
+          <ActionButton
+            variant="outlined"
             disabled={ingesting}
             onClick={() => void onPickFiles()}
-            className="border-border bg-background inline-flex h-11 shrink-0 items-center gap-2 rounded-xl border px-4 text-sm font-medium disabled:opacity-50"
           >
-            <UploadIcon className="size-4" />
-            Dateien
-          </button>
-          <button
-            type="button"
+            <UploadIcon style={{ width: 18, height: 18 }} />
+            Dateien wählen
+          </ActionButton>
+          <ActionButton
+            variant="outlined"
             disabled={ingesting}
             onClick={() => void onLoadSample()}
-            className="text-foreground inline-flex h-11 shrink-0 items-center gap-2 rounded-xl px-4 text-sm font-medium hover:bg-muted disabled:opacity-50"
           >
-            <SparklesIcon className="size-4" />
+            <SparklesIcon style={{ width: 18, height: 18 }} />
             Beispiel laden
-          </button>
-          <span className="bg-border mx-1 hidden h-6 w-px sm:block" />
-          <button
-            type="button"
-            onClick={() => void onPickLogo()}
-            className="text-foreground inline-flex h-11 shrink-0 items-center gap-2 rounded-xl px-4 text-sm font-medium hover:bg-muted"
-          >
-            <ImageIcon className="size-4" />
-            {hasLogo ? "Logo ersetzen" : "Firmenlogo"}
-          </button>
-          {hasLogo ? (
-            <button
-              type="button"
-              onClick={() => void onClearLogo()}
-              className="text-muted-foreground inline-flex h-11 shrink-0 items-center gap-2 rounded-xl px-4 text-sm font-medium hover:bg-muted"
-            >
-              Logo entfernen
-            </button>
-          ) : null}
+          </ActionButton>
         </div>
       </div>
 
-      {ingesting ? (
-        <p className="text-muted-foreground flex items-center gap-2 text-sm">
-          <LoaderCircleIcon className="size-4 animate-spin" />
-          Unterlagen werden gelesen und indexiert…
-        </p>
-      ) : null}
-
-      {error ? (
-        <p className="text-destructive text-sm" role="alert">
-          {error}
-        </p>
-      ) : null}
-
-      {notice ? (
-        <p className="text-sm text-muted-foreground">{notice}</p>
-      ) : null}
-
-      {ready ? (
-        <div>
-          {confirmClear ? (
-            <div className="flex flex-wrap items-center gap-3">
-              <p className="text-sm">Alle Unterlagen aus dem Index nehmen?</p>
-              <Button
-                type="button"
-                size="sm"
-                variant="destructive"
+      <div
+        style={{
+          display: "flex",
+          flexWrap: "wrap",
+          alignItems: "center",
+          gap: 12,
+        }}
+      >
+        <ActionButton variant="muted" onClick={() => void onPickLogo()}>
+          <ImageIcon style={{ width: 18, height: 18 }} />
+          {hasLogo ? "Logo ersetzen" : "Firmenlogo wählen"}
+        </ActionButton>
+        {hasLogo ? (
+          <ActionButton variant="muted" onClick={() => void onClearLogo()}>
+            Logo entfernen
+          </ActionButton>
+        ) : null}
+        {ready ? (
+          confirmClear ? (
+            <>
+              <p style={{ margin: 0, fontSize: 14, color: "#0f172a" }}>
+                Alle Unterlagen aus dem Index nehmen?
+              </p>
+              <ActionButton
+                variant="danger"
                 onClick={() => {
                   setConfirmClear(false);
                   void onClear();
                 }}
               >
-                <Trash2Icon data-icon="inline-start" />
-                Leeren
-              </Button>
-              <Button
-                type="button"
-                size="sm"
-                variant="ghost"
+                <Trash2Icon style={{ width: 18, height: 18 }} />
+                Ja, leeren
+              </ActionButton>
+              <ActionButton
+                variant="muted"
                 onClick={() => setConfirmClear(false)}
               >
                 Abbrechen
-              </Button>
-            </div>
+              </ActionButton>
+            </>
           ) : (
-            <Button
-              type="button"
-              size="sm"
-              variant="ghost"
-              className="text-muted-foreground"
-              onClick={() => setConfirmClear(true)}
-            >
+            <ActionButton variant="danger" onClick={() => setConfirmClear(true)}>
+              <Trash2Icon style={{ width: 18, height: 18 }} />
               Unterlagen leeren
-            </Button>
-          )}
-        </div>
+            </ActionButton>
+          )
+        ) : null}
+      </div>
+
+      {ingesting ? (
+        <p
+          style={{
+            margin: 0,
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+            fontSize: 14,
+            color: "#475569",
+          }}
+        >
+          <LoaderCircleIcon
+            className="animate-spin"
+            style={{ width: 16, height: 16 }}
+          />
+          Unterlagen werden gelesen und indexiert…
+        </p>
+      ) : null}
+
+      {error ? (
+        <p role="alert" style={{ margin: 0, fontSize: 14, color: "#b91c1c" }}>
+          {error}
+        </p>
+      ) : null}
+
+      {notice ? (
+        <p style={{ margin: 0, fontSize: 14, color: "#0f766e", fontWeight: 600 }}>
+          {notice}
+        </p>
       ) : null}
     </div>
   );

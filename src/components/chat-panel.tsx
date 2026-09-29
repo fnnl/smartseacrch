@@ -1,9 +1,8 @@
-import { ArrowUpIcon, BookOpenIcon, LoaderCircleIcon } from "lucide-react";
+import { BookOpenIcon, LoaderCircleIcon, SendIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
+import { ActionButton } from "@/components/action-button";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 import type { AnswerMode, AskResponse, SourceHit } from "@/lib/types";
 
 export type ChatTurn = {
@@ -51,6 +50,8 @@ export function ChatPanel({
     setDraft("");
     await onAsk(question);
   };
+
+  const canSend = ready && !asking && draft.trim().length > 0;
 
   return (
     <div className="grid h-full min-h-0 grid-rows-[auto_minmax(0,1fr)_auto]">
@@ -111,50 +112,101 @@ export function ChatPanel({
       </div>
 
       <form
-        className="border-border/70 shrink-0 border-t px-8 py-5 md:px-12"
+        style={{
+          flexShrink: 0,
+          background: "#e7f1f0",
+          borderTop: "1px solid #b7d0cd",
+          padding: "18px 32px 20px",
+        }}
         onSubmit={(event) => {
           event.preventDefault();
           void submitFrom(draft);
         }}
       >
-        <div style={{ display: "flex", alignItems: "flex-end", gap: 12 }}>
-          <div className="bg-muted/70 min-w-0 flex-1 rounded-2xl px-3 py-2">
-            <Textarea
-              name="question"
-              value={draft}
-              onChange={(event) => setDraft(event.target.value)}
-              onKeyDown={(event) => {
-                if (event.key === "Enter" && !event.shiftKey) {
-                  event.preventDefault();
-                  void submitFrom(event.currentTarget.value);
-                }
-              }}
-              placeholder={
-                ready
-                  ? "Frage stellen, z. B. Was bedeutet Fehler E12?"
-                  : "Zuerst Unterlagen laden…"
+        <label
+          htmlFor="question-input"
+          style={{
+            display: "block",
+            fontSize: 15,
+            fontWeight: 700,
+            color: "#0f172a",
+            marginBottom: 8,
+          }}
+        >
+          Deine Frage
+        </label>
+        <div style={{ display: "flex", alignItems: "stretch", gap: 12 }}>
+          <textarea
+            id="question-input"
+            name="question"
+            className="question-input"
+            value={draft}
+            onChange={(event) => setDraft(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key === "Enter" && !event.shiftKey) {
+                event.preventDefault();
+                void submitFrom(event.currentTarget.value);
               }
-              disabled={asking || !ready}
-              aria-label="Frage"
-              className="min-h-[64px] max-h-48 w-full resize-none border-0 bg-transparent px-2 py-2 text-base shadow-none focus-visible:ring-0"
-            />
-          </div>
-          <Button
-            type="submit"
-            size="icon-lg"
-            className="mb-1 size-12 rounded-2xl"
+            }}
+            placeholder={
+              ready
+                ? "Schreibe hier deine Frage, z. B. Was bedeutet Fehler E12?"
+                : "Zuerst oben Unterlagen laden — dann hier die Frage eingeben"
+            }
             disabled={asking || !ready}
+            aria-label="Frage eingeben"
+            rows={3}
+            style={{
+              flex: 1,
+              minWidth: 0,
+              minHeight: 96,
+              maxHeight: 200,
+              padding: "14px 16px",
+              border: ready ? "2px solid #0f766e" : "2px solid #64748b",
+              borderRadius: 12,
+              background: ready ? "#ffffff" : "#f8fafc",
+              fontSize: 16,
+              lineHeight: 1.5,
+              color: "#0f172a",
+              resize: "none",
+              fontFamily: "inherit",
+              boxShadow: "inset 0 1px 2px rgba(15, 23, 42, 0.06)",
+              outline: "none",
+            }}
+          />
+          <ActionButton
+            type="submit"
+            variant="filled"
+            disabled={!canSend}
             aria-label="Frage senden"
+            style={{
+              minWidth: 168,
+              height: "auto",
+              alignSelf: "stretch",
+              flexDirection: "column",
+              gap: 6,
+            }}
           >
             {asking ? (
-              <LoaderCircleIcon className="animate-spin" />
+              <LoaderCircleIcon
+                className="animate-spin"
+                style={{ width: 20, height: 20 }}
+              />
             ) : (
-              <ArrowUpIcon />
+              <SendIcon style={{ width: 20, height: 20 }} />
             )}
-          </Button>
+            Frage senden
+          </ActionButton>
         </div>
-        <p className="text-muted-foreground mt-3 text-xs leading-5">
-          Eingabe sendet, Umschalt+Eingabe macht eine neue Zeile.
+        <p
+          style={{
+            margin: "10px 0 0",
+            fontSize: 12,
+            lineHeight: 1.5,
+            color: "#475569",
+          }}
+        >
+          Eingabe sendet die Frage. Umschalt+Eingabe macht eine neue Zeile.
         </p>
       </form>
     </div>
@@ -184,23 +236,20 @@ function EmptyChat({
         <p className="mt-3 text-[0.95rem] leading-7 text-muted-foreground">
           {ready
             ? "Eine normale Frage reicht. Die Antwort bleibt an der Quelle kleben."
-            : "Wähle den Ordner mit Problembeschreibungen und Handbüchern. Danach reicht eine normale Frage."}
+            : "Wähle oben den Ordner mit Problembeschreibungen und Handbüchern. Danach die Frage ins Feld unten schreiben."}
         </p>
       </div>
       {ready ? (
-        <div
-          style={{ display: "flex", flexWrap: "wrap", gap: 10 }}
-        >
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
           {EXAMPLES.map((example) => (
-            <button
+            <ActionButton
               key={example}
-              type="button"
+              variant="outlined"
               disabled={asking}
-              className="border-border bg-background hover:bg-muted rounded-full border px-4 py-2 text-left text-sm leading-6 shadow-sm transition-colors disabled:opacity-50"
               onClick={() => onAsk(example)}
             >
               {example}
-            </button>
+            </ActionButton>
           ))}
         </div>
       ) : null}
