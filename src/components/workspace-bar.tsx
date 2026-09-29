@@ -45,7 +45,8 @@ export function WorkspaceBar({
   return (
     <div className="mt-6 space-y-4">
       <div
-        className={`rounded-3xl border px-5 py-4 transition-colors ${
+        style={{ display: "flex", flexDirection: "column", gap: 20 }}
+        className={`w-full rounded-3xl border px-6 py-5 transition-colors ${
           dragging
             ? "border-primary bg-primary/8"
             : "border-border/80 bg-card/80"
@@ -78,55 +79,53 @@ export function WorkspaceBar({
           <span className="text-foreground font-medium">Text</span> lokal —
           nichts geht ins Netz.
         </p>
-        <div className="mt-4 flex flex-wrap items-center gap-2.5">
-          <Button
+        <div
+          style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 12 }}
+        >
+          <button
             type="button"
-            size="lg"
             disabled={ingesting}
             onClick={() => void onPickFolder()}
+            className="bg-primary text-primary-foreground inline-flex h-11 shrink-0 items-center gap-2 rounded-xl px-4 text-sm font-medium disabled:opacity-50"
           >
-            <FolderOpenIcon data-icon="inline-start" />
+            <FolderOpenIcon className="size-4" />
             Ordner wählen
-          </Button>
-          <Button
+          </button>
+          <button
             type="button"
-            size="lg"
-            variant="outline"
             disabled={ingesting}
             onClick={() => void onPickFiles()}
+            className="border-border bg-background inline-flex h-11 shrink-0 items-center gap-2 rounded-xl border px-4 text-sm font-medium disabled:opacity-50"
           >
-            <UploadIcon data-icon="inline-start" />
+            <UploadIcon className="size-4" />
             Dateien
-          </Button>
-          <Button
+          </button>
+          <button
             type="button"
-            size="lg"
-            variant="ghost"
             disabled={ingesting}
             onClick={() => void onLoadSample()}
+            className="text-foreground inline-flex h-11 shrink-0 items-center gap-2 rounded-xl px-4 text-sm font-medium hover:bg-muted disabled:opacity-50"
           >
-            <SparklesIcon data-icon="inline-start" />
+            <SparklesIcon className="size-4" />
             Beispiel laden
-          </Button>
-          <span className="bg-border/80 mx-1 hidden h-6 w-px sm:block" />
-          <Button
+          </button>
+          <span className="bg-border mx-1 hidden h-6 w-px sm:block" />
+          <button
             type="button"
-            size="lg"
-            variant="ghost"
             onClick={() => void onPickLogo()}
+            className="text-foreground inline-flex h-11 shrink-0 items-center gap-2 rounded-xl px-4 text-sm font-medium hover:bg-muted"
           >
-            <ImageIcon data-icon="inline-start" />
+            <ImageIcon className="size-4" />
             {hasLogo ? "Logo ersetzen" : "Firmenlogo"}
-          </Button>
+          </button>
           {hasLogo ? (
-            <Button
+            <button
               type="button"
-              size="lg"
-              variant="ghost"
               onClick={() => void onClearLogo()}
+              className="text-muted-foreground inline-flex h-11 shrink-0 items-center gap-2 rounded-xl px-4 text-sm font-medium hover:bg-muted"
             >
               Logo entfernen
-            </Button>
+            </button>
           ) : null}
         </div>
       </div>

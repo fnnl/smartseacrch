@@ -185,7 +185,7 @@ export function App() {
       </header>
 
       <main className="flex min-h-0 flex-1 px-6 pb-6 pt-4 md:px-10">
-        <div className="bg-card ring-foreground/6 flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-[1.75rem] ring-1">
+        <div className="bg-card ring-foreground/6 grid h-full min-h-0 min-w-0 flex-1 grid-rows-1 rounded-[1.75rem] ring-1">
           <ChatPanel
             turns={turns}
             ready={ready}
