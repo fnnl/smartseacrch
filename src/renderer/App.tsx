@@ -135,12 +135,8 @@ export function App() {
     >
       <header
         style={{
-          flex: "0 1 auto",
-          maxHeight: "40%",
-          minHeight: 0,
-          overflowY: "auto",
-          overflowX: "hidden",
-          padding: "16px clamp(16px, 3vw, 40px) 8px",
+          flex: "0 0 auto",
+          padding: "12px clamp(16px, 3vw, 32px) 8px",
         }}
       >
         <div className="flex items-start justify-between gap-6">

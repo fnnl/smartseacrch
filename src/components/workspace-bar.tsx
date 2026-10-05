@@ -43,17 +43,17 @@ export function WorkspaceBar({
   const [confirmClear, setConfirmClear] = useState(false);
 
   return (
-    <div style={{ marginTop: 16, display: "flex", flexDirection: "column", gap: 12 }}>
+    <div style={{ marginTop: 12, display: "flex", flexDirection: "column", gap: 10 }}>
       <div
         style={{
           display: "flex",
           flexDirection: "column",
           gap: 12,
           width: "100%",
-          borderRadius: 16,
+          borderRadius: 14,
           border: dragging ? "2px dashed var(--primary)" : "2px dashed var(--border)",
           background: dragging ? "var(--accent)" : "#ffffff",
-          padding: "16px clamp(16px, 2vw, 24px)",
+          padding: "12px clamp(12px, 2vw, 20px)",
         }}
         onDragEnter={(event) => {
           event.preventDefault();
@@ -82,7 +82,7 @@ export function WorkspaceBar({
               margin: 0,
               fontSize: 16,
               fontWeight: 700,
-              color: "#0f172a",
+              color: "var(--foreground)",
             }}
           >
             Unterlagen hinzufügen
@@ -133,56 +133,46 @@ export function WorkspaceBar({
             <SparklesIcon style={{ width: 18, height: 18 }} />
             Beispiel laden
           </ActionButton>
-        </div>
-      </div>
-
-      <div
-        style={{
-          display: "flex",
-          flexWrap: "wrap",
-          alignItems: "center",
-          gap: 12,
-        }}
-      >
-        <ActionButton variant="muted" onClick={() => void onPickLogo()}>
-          <ImageIcon style={{ width: 18, height: 18 }} />
-          {hasLogo ? "Logo ersetzen" : "Firmenlogo wählen"}
-        </ActionButton>
-        {hasLogo ? (
-          <ActionButton variant="muted" onClick={() => void onClearLogo()}>
-            Logo entfernen
+          <ActionButton variant="muted" onClick={() => void onPickLogo()}>
+            <ImageIcon style={{ width: 18, height: 18 }} />
+            {hasLogo ? "Logo ersetzen" : "Firmenlogo wählen"}
           </ActionButton>
-        ) : null}
-        {ready ? (
-          confirmClear ? (
-            <>
-              <p style={{ margin: 0, fontSize: 14, color: "#0f172a" }}>
-                Alle Unterlagen aus dem Index nehmen?
-              </p>
-              <ActionButton
-                variant="danger"
-                onClick={() => {
-                  setConfirmClear(false);
-                  void onClear();
-                }}
-              >
-                <Trash2Icon style={{ width: 18, height: 18 }} />
-                Ja, leeren
-              </ActionButton>
-              <ActionButton
-                variant="muted"
-                onClick={() => setConfirmClear(false)}
-              >
-                Abbrechen
-              </ActionButton>
-            </>
-          ) : (
-            <ActionButton variant="danger" onClick={() => setConfirmClear(true)}>
-              <Trash2Icon style={{ width: 18, height: 18 }} />
-              Unterlagen leeren
+          {hasLogo ? (
+            <ActionButton variant="muted" onClick={() => void onClearLogo()}>
+              Logo entfernen
             </ActionButton>
-          )
-        ) : null}
+          ) : null}
+          {ready ? (
+            confirmClear ? (
+              <>
+                <p style={{ margin: 0, fontSize: 14, color: "var(--foreground)" }}>
+                  Alle Unterlagen aus dem Index nehmen?
+                </p>
+                <ActionButton
+                  variant="danger"
+                  onClick={() => {
+                    setConfirmClear(false);
+                    void onClear();
+                  }}
+                >
+                  <Trash2Icon style={{ width: 18, height: 18 }} />
+                  Ja, leeren
+                </ActionButton>
+                <ActionButton
+                  variant="muted"
+                  onClick={() => setConfirmClear(false)}
+                >
+                  Abbrechen
+                </ActionButton>
+              </>
+            ) : (
+              <ActionButton variant="danger" onClick={() => setConfirmClear(true)}>
+                <Trash2Icon style={{ width: 18, height: 18 }} />
+                Unterlagen leeren
+              </ActionButton>
+            )
+          ) : null}
+        </div>
       </div>
 
       {ingesting ? (
