@@ -348,6 +348,7 @@ function AnswerCard({ turn }: { turn: ChatTurn }) {
 
 function SourceFootnotes({ sources }: { sources: SourceHit[] }) {
   const [error, setError] = useState<string | null>(null);
+  const [opened, setOpened] = useState<string | null>(null);
 
   return (
     <div>
@@ -367,13 +368,21 @@ function SourceFootnotes({ sources }: { sources: SourceHit[] }) {
             key={`${source.documentId}-${source.chunkIndex}-${index}`}
             source={source}
             index={index}
-            onError={setError}
+            onError={(message) => {
+              setError(message);
+              if (message) setOpened(null);
+            }}
+            onOpened={(label) => {
+              setError(null);
+              setOpened(label);
+            }}
           />
         ))}
       </div>
       {error ? (
         <p
           role="alert"
+          data-source-open-error="true"
           style={{
             margin: "8px 0 0",
             textAlign: "right",
@@ -385,6 +394,19 @@ function SourceFootnotes({ sources }: { sources: SourceHit[] }) {
         >
           {error}
         </p>
+      ) : opened ? (
+        <p
+          data-source-open-ok="true"
+          style={{
+            margin: "8px 0 0",
+            textAlign: "right",
+            color: "#1f6a3a",
+            fontSize: 13,
+            lineHeight: 1.45,
+          }}
+        >
+          {opened}
+        </p>
       ) : null}
     </div>
   );
@@ -394,10 +416,12 @@ function SourceFootnote({
   source,
   index,
   onError,
+  onOpened,
 }: {
   source: SourceHit;
   index: number;
   onError: (message: string | null) => void;
+  onOpened: (label: string) => void;
 }) {
   const buttonRef = useRef<HTMLButtonElement>(null);
   const [open, setOpen] = useState(false);
@@ -428,6 +452,11 @@ function SourceFootnote({
       const result = await window.smartsearch.openSource(source);
       if (result.ok) {
         onError(null);
+        onOpened(
+          source.page
+            ? `Geöffnet: ${source.fileName} · Seite ${source.page}`
+            : `Geöffnet: ${source.fileName}`,
+        );
       } else {
         onError(result.error);
         show();
@@ -444,6 +473,8 @@ function SourceFootnote({
       <button
         ref={buttonRef}
         type="button"
+        data-source-footnote="true"
+        data-file-name={source.fileName}
         aria-label={`Quelle ${index + 1}: ${source.fileName}, Stelle ${source.chunkIndex + 1}. Klicken öffnet die Datei.`}
         aria-expanded={open}
         title="Klicken öffnet die Datei"
@@ -454,17 +485,17 @@ function SourceFootnote({
         onClick={() => void openFile()}
         disabled={opening}
         style={{
-          minWidth: 22,
-          height: 22,
-          padding: "0 6px",
+          minWidth: 26,
+          height: 26,
+          padding: "0 7px",
           borderRadius: 999,
           border: "1px solid var(--border)",
           background: "#ffffff",
           color: "var(--primary)",
-          fontSize: 11,
+          fontSize: 12,
           fontWeight: 700,
           fontFamily: "inherit",
-          lineHeight: "20px",
+          lineHeight: "24px",
           cursor: opening ? "wait" : "pointer",
         }}
       >
