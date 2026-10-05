@@ -1,6 +1,6 @@
 # SmartSeacrch
 
-Lokales Windows-Programm für Fragen an Handbücher und Problembeschreibungen. Kein Webserver, kein Upload: jede Person startet die App auf ihrem PC und wählt den Ordner mit den Dateien.
+Lokales Windows-Programm für Fragen an Handbücher und Problembeschreibungen. Kein Webserver, kein Upload: jede Person startet die App auf ihrem PC.
 
 Repository: https://github.com/fnnl/smartseacrch
 
@@ -12,7 +12,7 @@ Fertige Dateien: https://github.com/fnnl/smartseacrch/releases/latest
    - **SmartSeacrch-Setup-0.1.0.exe** — Installation mit Verknüpfung im Startmenü und auf dem Desktop
    - **SmartSeacrch-Portable-0.1.0.exe** — eine Datei kopieren, nicht installieren (USB-Stick oder Ordner)
 2. Doppelklicken. Erscheint eine Windows-Warnung («Unbekannter Herausgeber»): **Weitere Informationen** → **Trotzdem ausführen**
-3. In der App **Ordner wählen** oder **Dateien wählen**, dann unten eine Frage eintippen
+3. Unten eine Frage eintippen. Unterlagen legt die **Verwaltung** an (nicht jede Person).
 
 SHA-256 (v0.1.0):
 
@@ -23,14 +23,18 @@ SHA-256 (v0.1.0):
 
 Node.js, Internet und ein Server sind nicht nötig. Der Index bleibt auf diesem PC.
 
-## Bedienung
+## Bedienung (Suche)
 
-1. **Ordner wählen** oder **Dateien wählen** — Word (`.docx`), PDF, Text. Importierte Dateien erscheinen nicht als Liste.
-2. Optional **Firmenlogo wählen** — bleibt auf diesem Rechner.
-3. Unten ins Feld **Deine Frage** schreiben, z. B. «Was bedeutet Fehler E12?», dann **Frage senden**.
-4. Die Antwort nennt Datei und Stelle
+1. Unten ins Feld **Deine Frage** schreiben, z. B. «Was bedeutet Fehler E12?», dann **Frage senden**.
+2. Die Antwort nennt Datei und Stelle
 
-«Beispiel laden» legt ein kurzes KV-400-Handbuch in den Index, zum Ausprobieren.
+## Verwaltung (Quellen)
+
+Unterlagen (Word, PDF, Text) legt nur die Verwaltung an. Oben rechts **Verwaltung**:
+
+1. Beim ersten Mal ein Passwort setzen (mindestens 8 Zeichen, zweimal eingeben). Es bleibt nur auf diesem Rechner, nicht im Programmcode.
+2. Später mit diesem Passwort anmelden. Falsches Passwort wird abgelehnt.
+3. Nach der Anmeldung: **Ordner wählen**, **Dateien wählen**, **Beispiel laden**, einzelne Dateien **Entfernen** oder **Unterlagen leeren**.
 
 Ohne API-Key: Antworten sind Auszüge aus den Dokumenten. Optional `OPENAI_API_KEY` oder `ANTHROPIC_API_KEY` in der Umgebung, dann formuliert ein Sprachmodell.
 

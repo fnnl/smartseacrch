@@ -184,7 +184,7 @@ export function ChatPanel({
             placeholder={
               ready
                 ? "Schreibe hier deine Frage, z. B. Was bedeutet Fehler E12?"
-                : "Zuerst oben Unterlagen laden — dann hier die Frage eingeben"
+                : "Zuerst muss die Verwaltung Unterlagen hinterlegen — dann hier die Frage eingeben"
             }
             disabled={asking || !ready}
             aria-label="Frage eingeben"
@@ -270,7 +270,7 @@ function EmptyChat({
         <p className="mt-3 text-[0.95rem] leading-7 text-muted-foreground">
           {ready
             ? "Eine normale Frage reicht. Die Antwort bleibt an der Quelle kleben."
-            : "Wähle oben den Ordner mit Problembeschreibungen und Handbüchern. Danach die Frage ins Feld unten schreiben."}
+            : "Die Verwaltung hinterlegt die Handbücher und Problembeschreibungen. Danach die Frage ins Feld unten schreiben."}
         </p>
       </div>
       {ready ? (

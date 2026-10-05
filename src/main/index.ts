@@ -3,6 +3,14 @@ import path from "node:path";
 
 import { answerQuestion } from "@/lib/answer";
 import {
+  adminStatus,
+  lockAdmin,
+  requireAdmin,
+  setAdminDir,
+  setupAdminPassword,
+  unlockAdmin,
+} from "@/lib/admin";
+import {
   clearLogo,
   loadBranding,
   saveLogoFromPath,
@@ -15,6 +23,7 @@ import {
   clearStore,
   configuredAnswerMode,
   loadStore,
+  removeDocument,
   setDataDir,
 } from "@/lib/store";
 import type { IngestResponse, LibraryResponse } from "@/lib/types";
@@ -74,11 +83,18 @@ async function createWindow(): Promise<void> {
 function registerIpc(): void {
   ipcMain.handle("library:get", async () => libraryFromStore(await loadStore()));
 
-  ipcMain.handle("library:clear", async () =>
-    libraryFromStore(await clearStore()),
-  );
+  ipcMain.handle("library:clear", async () => {
+    requireAdmin();
+    return libraryFromStore(await clearStore());
+  });
+
+  ipcMain.handle("library:remove", async (_event, documentId: string) => {
+    requireAdmin();
+    return libraryFromStore(await removeDocument(documentId));
+  });
 
   ipcMain.handle("ingest:paths", async (_event, paths: string[]) => {
+    requireAdmin();
     const files = await filesFromPaths(paths);
     if (!files.length) {
       const store = await loadStore();
@@ -98,6 +114,7 @@ function registerIpc(): void {
   });
 
   ipcMain.handle("ingest:pick-files", async () => {
+    requireAdmin();
     const picked = await dialog.showOpenDialog({
       title: "Dokumente wählen",
       properties: ["openFile", "multiSelections"],
@@ -111,6 +128,7 @@ function registerIpc(): void {
   });
 
   ipcMain.handle("ingest:pick-folder", async () => {
+    requireAdmin();
     const picked = await dialog.showOpenDialog({
       title: "Ordner mit Handbüchern wählen",
       properties: ["openDirectory"],
@@ -120,6 +138,7 @@ function registerIpc(): void {
   });
 
   ipcMain.handle("ingest:sample", async () => {
+    requireAdmin();
     const samples = await buildSampleFiles();
     return ingestIncomingFiles(
       samples.map((file) => ({
@@ -131,9 +150,25 @@ function registerIpc(): void {
     );
   });
 
+  ipcMain.handle("admin:status", async () => adminStatus());
+
+  ipcMain.handle("admin:setup", async (_event, password: string) =>
+    setupAdminPassword(typeof password === "string" ? password : ""),
+  );
+
+  ipcMain.handle("admin:login", async (_event, password: string) =>
+    unlockAdmin(typeof password === "string" ? password : ""),
+  );
+
+  ipcMain.handle("admin:logout", async () => {
+    lockAdmin();
+    return adminStatus();
+  });
+
   ipcMain.handle("branding:get", async () => loadBranding());
 
   ipcMain.handle("branding:pick", async () => {
+    requireAdmin();
     const picked = await dialog.showOpenDialog({
       title: "Firmenlogo wählen",
       properties: ["openFile"],
@@ -148,7 +183,10 @@ function registerIpc(): void {
     return saveLogoFromPath(picked.filePaths[0]);
   });
 
-  ipcMain.handle("branding:clear", async () => clearLogo());
+  ipcMain.handle("branding:clear", async () => {
+    requireAdmin();
+    return clearLogo();
+  });
 
   ipcMain.handle("ask", async (_event, question: string) => {
     const trimmed = question.trim();
@@ -159,7 +197,7 @@ function registerIpc(): void {
     if (!store.chunks.length) {
       return {
         error:
-          "Es sind noch keine Unterlagen indexiert. Wähle zuerst Dateien oder einen Ordner.",
+          "Es sind noch keine Unterlagen hinterlegt. Die Verwaltung legt sie an.",
       };
     }
     return answerQuestion(store.chunks, trimmed);
@@ -170,6 +208,7 @@ app.whenReady().then(async () => {
   const dataDir = path.join(app.getPath("userData"), "data");
   setDataDir(dataDir);
   setBrandingDir(dataDir);
+  setAdminDir(dataDir);
   registerIpc();
   await createWindow();
 

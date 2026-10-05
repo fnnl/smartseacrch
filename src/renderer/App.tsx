@@ -1,15 +1,16 @@
 import { useEffect, useState } from "react";
 
+import { AdminPanel } from "@/components/admin-panel";
 import {
   ChatPanel,
   turnFromResponse,
   type ChatTurn,
 } from "@/components/chat-panel";
-import { WorkspaceBar } from "@/components/workspace-bar";
 import type {
   AnswerMode,
   AskResponse,
   IngestResponse,
+  LibraryDocument,
   LibraryResponse,
 } from "@/lib/types";
 
@@ -22,9 +23,12 @@ export function App() {
   const [asking, setAsking] = useState(false);
   const [turns, setTurns] = useState<ChatTurn[]>([]);
   const [logoDataUrl, setLogoDataUrl] = useState<string | null>(null);
+  const [documents, setDocuments] = useState<LibraryDocument[]>([]);
+  const [adminOpen, setAdminOpen] = useState(false);
 
   const applyLibrary = (data: LibraryResponse | IngestResponse) => {
     setReady(data.chunkCount > 0);
+    setDocuments(data.documents);
     if ("answerMode" in data) setAnswerMode(data.answerMode);
   };
 
@@ -165,53 +169,41 @@ export function App() {
               </p>
             </div>
           </div>
-          <p
-            className={`hidden shrink-0 rounded-full px-3.5 py-1.5 text-sm sm:inline-flex ${
-              ready
-                ? "bg-primary/10 text-primary"
-                : "bg-muted text-muted-foreground"
-            }`}
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "flex-end",
+              gap: 8,
+              flexShrink: 0,
+            }}
           >
-            {ready ? "Bereit zum Fragen" : "Noch keine Unterlagen"}
-          </p>
+            <p
+              className={`hidden shrink-0 rounded-full px-3.5 py-1.5 text-sm sm:inline-flex ${
+                ready
+                  ? "bg-primary/10 text-primary"
+                  : "bg-muted text-muted-foreground"
+              }`}
+            >
+              {ready ? "Bereit zum Fragen" : "Noch keine Unterlagen"}
+            </p>
+            <button
+              type="button"
+              onClick={() => setAdminOpen(true)}
+              style={{
+                border: "none",
+                background: "transparent",
+                color: "#5c6570",
+                fontSize: 13,
+                cursor: "pointer",
+                textDecoration: "underline",
+                textUnderlineOffset: 3,
+              }}
+            >
+              Verwaltung
+            </button>
+          </div>
         </div>
-
-        <WorkspaceBar
-          ready={ready}
-          ingesting={ingesting}
-          error={libraryError}
-          notice={notice}
-          hasLogo={Boolean(logoDataUrl)}
-          onPickFiles={() => runIngest(() => window.smartsearch.pickFiles())}
-          onPickFolder={() => runIngest(() => window.smartsearch.pickFolder())}
-          onDropPaths={(paths) =>
-            runIngest(() => window.smartsearch.ingestPaths(paths))
-          }
-          onLoadSample={() => runIngest(() => window.smartsearch.loadSample())}
-          onPickLogo={async () => {
-            try {
-              const branding = await window.smartsearch.pickLogo();
-              if (!branding) return;
-              setLogoDataUrl(branding.logoDataUrl);
-              setLibraryError(null);
-            } catch (error) {
-              setLibraryError(
-                error instanceof Error
-                  ? error.message
-                  : "Das Logo konnte nicht geladen werden.",
-              );
-            }
-          }}
-          onClearLogo={async () => {
-            const branding = await window.smartsearch.clearLogo();
-            setLogoDataUrl(branding.logoDataUrl);
-          }}
-          onClear={async () => {
-            applyLibrary(await window.smartsearch.clear());
-            setTurns([]);
-            setNotice(null);
-          }}
-        />
       </header>
 
       <main
@@ -248,6 +240,49 @@ export function App() {
           />
         </div>
       </main>
+
+      <AdminPanel
+        open={adminOpen}
+        onClose={() => setAdminOpen(false)}
+        documents={documents}
+        ready={ready}
+        ingesting={ingesting}
+        error={libraryError}
+        notice={notice}
+        hasLogo={Boolean(logoDataUrl)}
+        onPickFiles={() => runIngest(() => window.smartsearch.pickFiles())}
+        onPickFolder={() => runIngest(() => window.smartsearch.pickFolder())}
+        onDropPaths={(paths) =>
+          runIngest(() => window.smartsearch.ingestPaths(paths))
+        }
+        onLoadSample={() => runIngest(() => window.smartsearch.loadSample())}
+        onPickLogo={async () => {
+          try {
+            const branding = await window.smartsearch.pickLogo();
+            if (!branding) return;
+            setLogoDataUrl(branding.logoDataUrl);
+            setLibraryError(null);
+          } catch (error) {
+            setLibraryError(
+              error instanceof Error
+                ? error.message
+                : "Das Logo konnte nicht geladen werden.",
+            );
+          }
+        }}
+        onClearLogo={async () => {
+          const branding = await window.smartsearch.clearLogo();
+          setLogoDataUrl(branding.logoDataUrl);
+        }}
+        onClear={async () => {
+          applyLibrary(await window.smartsearch.clear());
+          setTurns([]);
+          setNotice(null);
+        }}
+        onRemove={async (documentId) => {
+          applyLibrary(await window.smartsearch.removeDocument(documentId));
+        }}
+      />
     </div>
   );
 }
