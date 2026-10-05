@@ -1,4 +1,4 @@
-import { app, BrowserWindow, dialog, ipcMain } from "electron";
+import { app, BrowserWindow, dialog, ipcMain, screen } from "electron";
 import path from "node:path";
 
 import { answerQuestion } from "@/lib/answer";
@@ -29,20 +29,39 @@ function libraryFromStore(
   };
 }
 
+function initialWindowBounds(): { width: number; height: number } {
+  const { width: areaWidth, height: areaHeight } =
+    screen.getPrimaryDisplay().workAreaSize;
+  return {
+    width: Math.min(areaWidth, Math.max(720, Math.round(areaWidth * 0.9))),
+    height: Math.min(areaHeight, Math.max(560, Math.round(areaHeight * 0.9))),
+  };
+}
+
 async function createWindow(): Promise<void> {
+  const { width, height } = initialWindowBounds();
   const window = new BrowserWindow({
-    width: 1360,
-    height: 900,
-    minWidth: 860,
-    minHeight: 640,
+    width,
+    height,
+    minWidth: 560,
+    minHeight: 480,
     title: "SmartSeacrch",
+    backgroundColor: "#f5f6f8",
     autoHideMenuBar: true,
+    show: false,
+    resizable: true,
+    maximizable: true,
+    useContentSize: false,
     webPreferences: {
       preload: path.join(__dirname, "../preload/index.js"),
       contextIsolation: true,
       nodeIntegration: false,
       sandbox: false,
     },
+  });
+
+  window.once("ready-to-show", () => {
+    window.show();
   });
 
   if (process.env.ELECTRON_RENDERER_URL) {

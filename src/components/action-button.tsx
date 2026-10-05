@@ -7,9 +7,9 @@ const base: CSSProperties = {
   alignItems: "center",
   justifyContent: "center",
   gap: 8,
-  minHeight: 48,
-  padding: "0 20px",
-  borderRadius: 12,
+  minHeight: 44,
+  padding: "0 18px",
+  borderRadius: 10,
   fontSize: 15,
   fontWeight: 600,
   lineHeight: 1.2,
@@ -17,33 +17,33 @@ const base: CSSProperties = {
   cursor: "pointer",
   flexShrink: 0,
   fontFamily: "inherit",
-  boxShadow: "0 1px 2px rgba(15, 23, 42, 0.08)",
+  boxShadow: "0 1px 2px rgba(27, 31, 36, 0.08)",
 };
 
 const variants: Record<ActionVariant, CSSProperties> = {
   filled: {
     ...base,
-    background: "#0f766e",
-    color: "#ffffff",
-    border: "2px solid #0f766e",
+    background: "var(--primary)",
+    color: "var(--primary-foreground)",
+    border: "2px solid var(--primary)",
   },
   outlined: {
     ...base,
     background: "#ffffff",
-    color: "#134e4a",
-    border: "2px solid #0f766e",
+    color: "var(--primary)",
+    border: "2px solid var(--primary)",
   },
   muted: {
     ...base,
     background: "#ffffff",
-    color: "#1e293b",
-    border: "2px solid #64748b",
+    color: "var(--foreground)",
+    border: "2px solid var(--border)",
   },
   danger: {
     ...base,
     background: "#ffffff",
-    color: "#b91c1c",
-    border: "2px solid #dc2626",
+    color: "#b42318",
+    border: "2px solid #b42318",
   },
 };
 

@@ -43,7 +43,7 @@ export function ChatPanel({
   useEffect(() => {
     const node = listRef.current;
     if (!node) return;
-    node.scrollTop = node.scrollHeight;
+    node.scrollTo({ top: node.scrollHeight, behavior: "auto" });
   }, [turns, asking]);
 
   const submitFrom = async (raw: string) => {
@@ -74,7 +74,7 @@ export function ChatPanel({
           alignItems: "flex-start",
           justifyContent: "space-between",
           gap: 16,
-          padding: "20px 32px 8px",
+          padding: "16px clamp(16px, 3vw, 32px) 8px",
         }}
       >
         <div className="max-w-2xl">
@@ -94,13 +94,15 @@ export function ChatPanel({
 
       <div
         ref={listRef}
+        data-answers-scroll="true"
         style={{
           flex: "1 1 0%",
           minHeight: 0,
           overflowX: "hidden",
           overflowY: "auto",
+          overscrollBehavior: "contain",
           scrollbarGutter: "stable",
-          padding: "8px 32px 16px",
+          padding: "8px clamp(16px, 3vw, 32px) 16px",
         }}
       >
         {turns.length === 0 ? (
@@ -145,12 +147,9 @@ export function ChatPanel({
         data-question-composer="true"
         style={{
           flex: "0 0 auto",
-          position: "sticky",
-          bottom: 0,
-          zIndex: 3,
-          background: "#e7f1f0",
-          borderTop: "1px solid #b7d0cd",
-          padding: "16px 32px 20px",
+          background: "var(--composer)",
+          borderTop: "1px solid var(--border)",
+          padding: "12px clamp(16px, 3vw, 32px) 16px",
         }}
         onSubmit={(event) => {
           event.preventDefault();
@@ -163,13 +162,13 @@ export function ChatPanel({
             display: "block",
             fontSize: 15,
             fontWeight: 700,
-            color: "#0f172a",
+            color: "var(--foreground)",
             marginBottom: 8,
           }}
         >
           Deine Frage
         </label>
-        <div style={{ display: "flex", alignItems: "stretch", gap: 12 }}>
+        <div style={{ display: "flex", alignItems: "stretch", gap: 12, flexWrap: "wrap" }}>
           <textarea
             id="question-input"
             name="question"
@@ -191,17 +190,17 @@ export function ChatPanel({
             aria-label="Frage eingeben"
             rows={3}
             style={{
-              flex: 1,
+              flex: "1 1 240px",
               minWidth: 0,
-              minHeight: 96,
-              maxHeight: 200,
+              minHeight: "clamp(72px, 12vh, 96px)",
+              maxHeight: 160,
               padding: "14px 16px",
-              border: ready ? "2px solid #0f766e" : "2px solid #64748b",
-              borderRadius: 12,
-              background: ready ? "#ffffff" : "#f8fafc",
+              border: ready ? "2px solid var(--primary)" : "2px solid var(--border)",
+              borderRadius: 10,
+              background: ready ? "#ffffff" : "#f7f8fa",
               fontSize: 16,
               lineHeight: 1.5,
-              color: "#0f172a",
+              color: "var(--foreground)",
               resize: "none",
               fontFamily: "inherit",
               boxShadow: "inset 0 1px 2px rgba(15, 23, 42, 0.06)",
@@ -214,7 +213,8 @@ export function ChatPanel({
             disabled={!canSend}
             aria-label="Frage senden"
             style={{
-              minWidth: 168,
+              minWidth: 140,
+              flex: "0 0 auto",
               height: "auto",
               alignSelf: "stretch",
               flexDirection: "column",
@@ -237,7 +237,7 @@ export function ChatPanel({
             margin: "10px 0 0",
             fontSize: 12,
             lineHeight: 1.5,
-            color: "#475569",
+            color: "var(--muted-foreground)",
           }}
         >
           Eingabe sendet die Frage. Umschalt+Eingabe macht eine neue Zeile.

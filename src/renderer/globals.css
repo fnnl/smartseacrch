@@ -49,65 +49,70 @@
 }
 
 :root {
-  --background: oklch(0.975 0.012 195);
-  --foreground: oklch(0.22 0.03 240);
-  --card: oklch(0.995 0.004 200);
-  --card-foreground: oklch(0.22 0.03 240);
-  --popover: oklch(0.995 0.004 200);
-  --popover-foreground: oklch(0.22 0.03 240);
-  --primary: oklch(0.48 0.1 195);
-  --primary-foreground: oklch(0.99 0.01 195);
-  --secondary: oklch(0.95 0.02 195);
-  --secondary-foreground: oklch(0.26 0.03 240);
-  --muted: oklch(0.955 0.014 200);
-  --muted-foreground: oklch(0.48 0.03 240);
-  --accent: oklch(0.94 0.03 195);
-  --accent-foreground: oklch(0.26 0.03 240);
-  --destructive: oklch(0.55 0.18 27);
-  --border: oklch(0.9 0.02 200);
-  --input: oklch(0.9 0.02 200);
-  --ring: oklch(0.48 0.1 195);
-  --chart-1: oklch(0.48 0.1 195);
-  --chart-2: oklch(0.62 0.08 80);
-  --chart-3: oklch(0.5 0.04 240);
-  --chart-4: oklch(0.4 0.03 240);
-  --chart-5: oklch(0.3 0.03 240);
-  --radius: 0.95rem;
-  --sidebar: oklch(0.96 0.016 195);
-  --sidebar-foreground: oklch(0.22 0.03 240);
-  --sidebar-primary: oklch(0.48 0.1 195);
-  --sidebar-primary-foreground: oklch(0.99 0.01 195);
-  --sidebar-accent: oklch(0.93 0.025 195);
-  --sidebar-accent-foreground: oklch(0.22 0.03 240);
-  --sidebar-border: oklch(0.9 0.02 200);
-  --sidebar-ring: oklch(0.48 0.1 195);
+  --background: #f5f6f8;
+  --foreground: #1b1f24;
+  --card: #ffffff;
+  --card-foreground: #1b1f24;
+  --popover: #ffffff;
+  --popover-foreground: #1b1f24;
+  --primary: #1f3a5f;
+  --primary-foreground: #ffffff;
+  --secondary: #eef0f3;
+  --secondary-foreground: #1b1f24;
+  --muted: #eef0f3;
+  --muted-foreground: #5c6570;
+  --accent: #e8ecf2;
+  --accent-foreground: #1b1f24;
+  --destructive: #b42318;
+  --border: #d8dce3;
+  --input: #d8dce3;
+  --ring: #1f3a5f;
+  --chart-1: #1f3a5f;
+  --chart-2: #64748b;
+  --chart-3: #334155;
+  --chart-4: #475569;
+  --chart-5: #1b1f24;
+  --radius: 0.75rem;
+  --sidebar: #f5f6f8;
+  --sidebar-foreground: #1b1f24;
+  --sidebar-primary: #1f3a5f;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #e8ecf2;
+  --sidebar-accent-foreground: #1b1f24;
+  --sidebar-border: #d8dce3;
+  --sidebar-ring: #1f3a5f;
+  --composer: #f0f2f5;
 }
 
 @layer base {
   * {
     @apply border-border outline-ring/50;
+    box-sizing: border-box;
   }
   html,
   body,
   #root {
+    width: 100%;
     height: 100%;
+    margin: 0;
+    max-width: 100%;
     max-height: 100%;
     overflow: hidden;
+    overscroll-behavior: none;
   }
   body {
     @apply bg-background text-foreground font-sans;
-    overflow: hidden;
   }
   .question-input::placeholder {
-    color: #475569;
+    color: #5c6570;
     opacity: 1;
   }
   .question-input:disabled::placeholder {
-    color: #64748b;
+    color: #7b8490;
     opacity: 1;
   }
   .question-input:focus {
-    border-color: #0f766e;
-    box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.22);
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(31, 58, 95, 0.18);
   }
 }

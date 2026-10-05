@@ -43,17 +43,17 @@ export function WorkspaceBar({
   const [confirmClear, setConfirmClear] = useState(false);
 
   return (
-    <div style={{ marginTop: 24, display: "flex", flexDirection: "column", gap: 16 }}>
+    <div style={{ marginTop: 16, display: "flex", flexDirection: "column", gap: 12 }}>
       <div
         style={{
           display: "flex",
           flexDirection: "column",
-          gap: 16,
+          gap: 12,
           width: "100%",
-          borderRadius: 20,
-          border: dragging ? "2px dashed #0f766e" : "2px dashed #94a3b8",
-          background: dragging ? "#ccfbf1" : "#ffffff",
-          padding: "20px 24px",
+          borderRadius: 16,
+          border: dragging ? "2px dashed var(--primary)" : "2px dashed var(--border)",
+          background: dragging ? "var(--accent)" : "#ffffff",
+          padding: "16px clamp(16px, 2vw, 24px)",
         }}
         onDragEnter={(event) => {
           event.preventDefault();
@@ -92,8 +92,8 @@ export function WorkspaceBar({
               margin: "6px 0 0",
               fontSize: 14,
               lineHeight: 1.55,
-              color: "#475569",
-              maxWidth: 720,
+              color: "#5c6570",
+              maxWidth: "100%",
             }}
           >
             Ordner oder Dateien von diesem Rechner wählen. SmartSeacrch liest
@@ -211,7 +211,7 @@ export function WorkspaceBar({
       ) : null}
 
       {notice ? (
-        <p style={{ margin: 0, fontSize: 14, color: "#0f766e", fontWeight: 600 }}>
+        <p style={{ margin: 0, fontSize: 14, color: "var(--primary)", fontWeight: 600 }}>
           {notice}
         </p>
       ) : null}

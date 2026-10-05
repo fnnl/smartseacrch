@@ -41,6 +41,20 @@ export function App() {
       .catch(() => undefined);
   }, []);
 
+  useEffect(() => {
+    const html = document.documentElement;
+    html.style.overflow = "hidden";
+    document.body.style.overflow = "hidden";
+    const pin = () => {
+      html.scrollTop = 0;
+      document.body.scrollTop = 0;
+      window.scrollTo(0, 0);
+    };
+    pin();
+    window.addEventListener("scroll", pin, { capture: true });
+    return () => window.removeEventListener("scroll", pin, { capture: true });
+  }, []);
+
   const runIngest = async (work: () => Promise<IngestResponse | null>) => {
     setIngesting(true);
     setLibraryError(null);
@@ -109,18 +123,24 @@ export function App() {
   return (
     <div
       style={{
+        position: "absolute",
+        inset: 0,
+        width: "100%",
+        height: "100%",
         display: "flex",
         flexDirection: "column",
-        height: "100%",
-        maxHeight: "100%",
-        minHeight: 0,
         overflow: "hidden",
+        background: "var(--background)",
       }}
     >
       <header
         style={{
-          flex: "0 0 auto",
-          padding: "24px 40px 8px",
+          flex: "0 1 auto",
+          maxHeight: "40%",
+          minHeight: 0,
+          overflowY: "auto",
+          overflowX: "hidden",
+          padding: "16px clamp(16px, 3vw, 40px) 8px",
         }}
       >
         <div className="flex items-start justify-between gap-6">
@@ -206,7 +226,7 @@ export function App() {
           display: "flex",
           flexDirection: "column",
           overflow: "hidden",
-          padding: "8px 24px 0",
+          padding: "4px clamp(12px, 2.5vw, 24px) 0",
         }}
       >
         <div
@@ -219,7 +239,8 @@ export function App() {
             overflow: "hidden",
             background: "var(--card)",
             borderRadius: "1.75rem 1.75rem 0 0",
-            boxShadow: "inset 0 0 0 1px color-mix(in oklab, var(--foreground) 6%, transparent)",
+            boxShadow:
+              "inset 0 0 0 1px color-mix(in srgb, var(--foreground) 8%, transparent)",
           }}
         >
           <ChatPanel
