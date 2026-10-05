@@ -4,6 +4,7 @@ export type LibraryDocument = {
   id: string;
   fileName: string;
   displayPath: string;
+  sourcePath?: string;
   format: DocumentFormat;
   size: number;
   chunkCount: number;
@@ -15,17 +16,21 @@ export type Chunk = {
   documentId: string;
   fileName: string;
   displayPath: string;
+  sourcePath?: string;
   text: string;
   index: number;
+  page?: number;
 };
 
 export type SourceHit = {
   documentId: string;
   fileName: string;
   displayPath: string;
+  sourcePath?: string;
   passage: string;
   score: number;
   chunkIndex: number;
+  page?: number;
 };
 
 export type AnswerMode = "extractive" | "generative";

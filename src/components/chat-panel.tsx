@@ -347,25 +347,45 @@ function AnswerCard({ turn }: { turn: ChatTurn }) {
 }
 
 function SourceFootnotes({ sources }: { sources: SourceHit[] }) {
+  const [error, setError] = useState<string | null>(null);
+
   return (
-    <div
-      aria-label="Quellen"
-      style={{
-        display: "flex",
-        justifyContent: "flex-end",
-        alignItems: "center",
-        flexWrap: "wrap",
-        gap: 6,
-        marginTop: 10,
-      }}
-    >
-      {sources.map((source, index) => (
-        <SourceFootnote
-          key={`${source.documentId}-${source.chunkIndex}-${index}`}
-          source={source}
-          index={index}
-        />
-      ))}
+    <div>
+      <div
+        aria-label="Quellen"
+        style={{
+          display: "flex",
+          justifyContent: "flex-end",
+          alignItems: "center",
+          flexWrap: "wrap",
+          gap: 6,
+          marginTop: 10,
+        }}
+      >
+        {sources.map((source, index) => (
+          <SourceFootnote
+            key={`${source.documentId}-${source.chunkIndex}-${index}`}
+            source={source}
+            index={index}
+            onError={setError}
+          />
+        ))}
+      </div>
+      {error ? (
+        <p
+          role="alert"
+          style={{
+            margin: "8px 0 0",
+            textAlign: "right",
+            color: "#b42318",
+            fontSize: 13,
+            lineHeight: 1.45,
+            whiteSpace: "pre-wrap",
+          }}
+        >
+          {error}
+        </p>
+      ) : null}
     </div>
   );
 }
@@ -373,13 +393,16 @@ function SourceFootnotes({ sources }: { sources: SourceHit[] }) {
 function SourceFootnote({
   source,
   index,
+  onError,
 }: {
   source: SourceHit;
   index: number;
+  onError: (message: string | null) => void;
 }) {
   const buttonRef = useRef<HTMLButtonElement>(null);
   const [open, setOpen] = useState(false);
   const [pos, setPos] = useState({ top: 0, right: 0, below: false });
+  const [opening, setOpening] = useState(false);
 
   const place = () => {
     const rect = buttonRef.current?.getBoundingClientRect();
@@ -399,17 +422,37 @@ function SourceFootnote({
 
   const hide = () => setOpen(false);
 
+  const openFile = async () => {
+    setOpening(true);
+    try {
+      const result = await window.smartsearch.openSource(source);
+      if (result.ok) {
+        onError(null);
+      } else {
+        onError(result.error);
+        show();
+      }
+    } catch {
+      onError("Die Datei konnte nicht geöffnet werden.");
+    } finally {
+      setOpening(false);
+    }
+  };
+
   return (
     <>
       <button
         ref={buttonRef}
         type="button"
-        aria-label={`Quelle ${index + 1}: ${source.fileName}, Stelle ${source.chunkIndex + 1}`}
+        aria-label={`Quelle ${index + 1}: ${source.fileName}, Stelle ${source.chunkIndex + 1}. Klicken öffnet die Datei.`}
         aria-expanded={open}
+        title="Klicken öffnet die Datei"
         onMouseEnter={show}
         onMouseLeave={hide}
         onFocus={show}
         onBlur={hide}
+        onClick={() => void openFile()}
+        disabled={opening}
         style={{
           minWidth: 22,
           height: 22,
@@ -422,7 +465,7 @@ function SourceFootnote({
           fontWeight: 700,
           fontFamily: "inherit",
           lineHeight: "20px",
-          cursor: "default",
+          cursor: opening ? "wait" : "pointer",
         }}
       >
         {index + 1}
@@ -461,8 +504,9 @@ function SourceFootnote({
               >
                 {source.fileName}
                 <span style={{ fontWeight: 500, color: "#5c6570" }}>
-                  {" "}
-                  · Stelle {source.chunkIndex + 1}
+                  {source.page
+                    ? ` · Seite ${source.page}`
+                    : ` · Stelle ${source.chunkIndex + 1}`}
                 </span>
               </p>
               <p
@@ -474,6 +518,16 @@ function SourceFootnote({
                 }}
               >
                 {source.passage}
+              </p>
+              <p
+                style={{
+                  margin: "8px 0 0",
+                  fontSize: 11,
+                  color: "#5c6570",
+                }}
+              >
+                Klicken öffnet die Datei
+                {source.page ? ` auf Seite ${source.page}` : ""}.
               </p>
             </div>,
             document.body,

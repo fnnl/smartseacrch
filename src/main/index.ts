@@ -1,4 +1,5 @@
 import { app, BrowserWindow, dialog, ipcMain, screen } from "electron";
+import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 
 import { answerQuestion } from "@/lib/answer";
@@ -18,6 +19,7 @@ import {
 } from "@/lib/branding";
 import { filesFromPaths } from "@/lib/from-disk";
 import { ingestIncomingFiles } from "@/lib/ingest";
+import { openSourceHit } from "@/lib/open-source";
 import { buildSampleFiles } from "@/lib/sample-docs";
 import {
   createChat,
@@ -30,11 +32,12 @@ import {
 import {
   clearStore,
   configuredAnswerMode,
+  getDataDir,
   loadStore,
   removeDocument,
   setDataDir,
 } from "@/lib/store";
-import type { ChatSession, IngestResponse, LibraryResponse } from "@/lib/types";
+import type { ChatSession, IngestResponse, LibraryResponse, SourceHit } from "@/lib/types";
 
 function libraryFromStore(
   store: Awaited<ReturnType<typeof loadStore>>,
@@ -148,14 +151,21 @@ function registerIpc(): void {
   ipcMain.handle("ingest:sample", async () => {
     requireAdmin();
     const samples = await buildSampleFiles();
-    return ingestIncomingFiles(
-      samples.map((file) => ({
-        name: file.name,
+    const originals = path.join(getDataDir(), "originals");
+    await mkdir(originals, { recursive: true });
+    const files = [];
+    for (const file of samples) {
+      const dest = path.join(originals, file.name.replace(/[\\/]/g, "__"));
+      await writeFile(dest, file.bytes);
+      files.push({
+        name: path.basename(file.name),
         displayPath: file.name,
+        sourcePath: dest,
         size: file.bytes.byteLength,
         bytes: file.bytes,
-      })),
-    );
+      });
+    }
+    return ingestIncomingFiles(files);
   });
 
   ipcMain.handle("admin:status", async () => adminStatus());
@@ -210,6 +220,10 @@ function registerIpc(): void {
 
   ipcMain.handle("chats:delete", async (_event, id: string) =>
     deleteChat(typeof id === "string" ? id : ""),
+  );
+
+  ipcMain.handle("source:open", async (_event, hit: SourceHit) =>
+    openSourceHit(hit),
   );
 
   ipcMain.handle("ask", async (_event, question: string) => {

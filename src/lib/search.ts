@@ -72,9 +72,11 @@ export function toSourceHits(ranked: RankedChunk[]): SourceHit[] {
       documentId: chunk.documentId,
       fileName: chunk.fileName,
       displayPath: chunk.displayPath,
+      sourcePath: chunk.sourcePath,
       passage: excerpt(chunk.text, 420),
       score,
       chunkIndex: chunk.index,
+      page: chunk.page,
     });
   }
 

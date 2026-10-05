@@ -23,7 +23,7 @@ export function formatFromName(fileName: string): DocumentFormat | null {
 export async function extractDocumentText(
   fileName: string,
   bytes: Uint8Array,
-): Promise<{ text: string; format: DocumentFormat }> {
+): Promise<{ text: string; format: DocumentFormat; pages?: string[] }> {
   const format = formatFromName(fileName);
   if (!format) {
     throw new ParseError(
@@ -32,10 +32,13 @@ export async function extractDocumentText(
   }
 
   let raw = "";
+  let pages: string[] | undefined;
   if (format === "docx") {
     raw = await extractDocx(bytes);
   } else if (format === "pdf") {
-    raw = await extractPdf(bytes);
+    const pdf = await extractPdf(bytes);
+    raw = pdf.text;
+    pages = pdf.pages;
   } else {
     raw = new TextDecoder("utf-8", { fatal: false }).decode(bytes);
   }
@@ -47,7 +50,7 @@ export async function extractDocumentText(
     );
   }
 
-  return { text, format };
+  return { text, format, pages };
 }
 
 async function extractDocx(bytes: Uint8Array): Promise<string> {
@@ -61,13 +64,22 @@ async function extractDocx(bytes: Uint8Array): Promise<string> {
   }
 }
 
-async function extractPdf(bytes: Uint8Array): Promise<string> {
+async function extractPdf(
+  bytes: Uint8Array,
+): Promise<{ text: string; pages: string[] }> {
   try {
-    // unpdf rejects Node Buffer; copy into a plain Uint8Array.
     const data = new Uint8Array(bytes);
     const pdf = await getDocumentProxy(data);
-    const extracted = await extractText(pdf, { mergePages: true });
-    return extracted.text;
+    const extracted = await extractText(pdf, { mergePages: false });
+    const pages = (
+      Array.isArray(extracted.text) ? extracted.text : [extracted.text]
+    )
+      .map((page) => normalizeText(page ?? ""))
+      .filter((page) => page.length > 0);
+    return {
+      pages,
+      text: pages.join("\n\n"),
+    };
   } catch {
     throw new ParseError("Die PDF-Datei konnte nicht gelesen werden.");
   }

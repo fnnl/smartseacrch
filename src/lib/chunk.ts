@@ -74,13 +74,52 @@ function splitLong(text: string): string[] {
 export function chunksForDocument(
   document: LibraryDocument,
   text: string,
+  pageTexts?: string[],
 ): Chunk[] {
-  return chunkText(text).map((chunk, index) => ({
+  const ranges = pageRanges(pageTexts);
+  const full = ranges.length ? pageTexts!.filter(Boolean).join("\n\n") : text;
+  return chunkText(full).map((chunk, index) => ({
     id: `${document.id}:${index}`,
     documentId: document.id,
     fileName: document.fileName,
     displayPath: document.displayPath,
+    sourcePath: document.sourcePath,
     text: chunk,
     index,
+    page: pageForChunk(chunk, full, ranges),
   }));
+}
+
+type PageRange = { page: number; start: number; end: number };
+
+function pageRanges(pageTexts?: string[]): PageRange[] {
+  if (!pageTexts?.length) return [];
+  const ranges: PageRange[] = [];
+  let pos = 0;
+  let written = 0;
+  for (let i = 0; i < pageTexts.length; i++) {
+    const page = pageTexts[i];
+    if (!page) continue;
+    if (written > 0) pos += 2;
+    const start = pos;
+    pos += page.length;
+    ranges.push({ page: i + 1, start, end: pos });
+    written += 1;
+  }
+  return ranges;
+}
+
+function pageForChunk(
+  chunk: string,
+  fullText: string,
+  ranges: PageRange[],
+): number | undefined {
+  if (!ranges.length) return undefined;
+  const needle = chunk.slice(0, Math.min(160, chunk.length));
+  const idx = needle ? fullText.indexOf(needle) : -1;
+  if (idx >= 0) {
+    const hit = ranges.find((range) => idx >= range.start && idx < range.end);
+    if (hit) return hit.page;
+  }
+  return ranges[0]?.page;
 }

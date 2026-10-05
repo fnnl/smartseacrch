@@ -17,6 +17,7 @@ import type {
 export type IncomingFile = {
   name: string;
   displayPath: string;
+  sourcePath?: string;
   size: number;
   bytes: Uint8Array;
 };
@@ -63,12 +64,13 @@ export async function ingestIncomingFiles(
         id: randomUUID(),
         fileName: baseName(file.name || label),
         displayPath: label,
+        sourcePath: file.sourcePath,
         format: parsed.format,
         size: file.size,
         chunkCount: 0,
         uploadedAt: new Date().toISOString(),
       };
-      const chunks = chunksForDocument(document, parsed.text);
+      const chunks = chunksForDocument(document, parsed.text, parsed.pages);
       if (!chunks.length) {
         skipped.push({
           name: label,

@@ -8,6 +8,7 @@ import type {
   ChatsSnapshot,
   IngestResponse,
   LibraryResponse,
+  SourceHit,
 } from "@/lib/types";
 
 export type SmartsearchApi = {
@@ -33,6 +34,9 @@ export type SmartsearchApi = {
   selectChat: (id: string) => Promise<ChatsSnapshot>;
   saveChat: (chat: ChatSession) => Promise<ChatsSnapshot>;
   deleteChat: (id: string) => Promise<ChatsSnapshot>;
+  openSource: (
+    source: SourceHit,
+  ) => Promise<{ ok: true } | { ok: false; error: string }>;
   pathForFile: (file: File) => string;
 };
 
@@ -58,6 +62,7 @@ const api: SmartsearchApi = {
   selectChat: (id) => ipcRenderer.invoke("chats:select", id),
   saveChat: (chat) => ipcRenderer.invoke("chats:save", chat),
   deleteChat: (id) => ipcRenderer.invoke("chats:delete", id),
+  openSource: (source) => ipcRenderer.invoke("source:open", source),
   pathForFile: (file) => webUtils.getPathForFile(file),
 };
 

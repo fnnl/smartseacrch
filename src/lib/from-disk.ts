@@ -65,6 +65,7 @@ async function readDiskFile(
   return {
     name: path.basename(fullPath),
     displayPath,
+    sourcePath: fullPath,
     size,
     bytes: new Uint8Array(buffer),
   };

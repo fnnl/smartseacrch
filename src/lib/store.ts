@@ -14,6 +14,10 @@ export function setDataDir(dir: string): void {
   dataDir = dir;
 }
 
+export function getDataDir(): string {
+  return dataDir;
+}
+
 function indexPath(): string {
   return path.join(dataDir, "index.json");
 }
