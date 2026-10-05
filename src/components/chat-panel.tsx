@@ -102,16 +102,35 @@ export function ChatPanel({
             onAsk={(question) => void submitFrom(question)}
           />
         ) : (
-          <ol className="space-y-8">
+          <ol style={{ listStyle: "none", margin: 0, padding: 0 }}>
             {turns.map((turn) => (
-              <li key={turn.id} className="space-y-4">
-                <div className="flex justify-end">
-                  <p className="bg-primary text-primary-foreground max-w-[40rem] rounded-3xl rounded-br-lg px-4 py-3 text-[0.95rem] leading-7">
+              <li key={turn.id} style={{ marginBottom: 28 }}>
+                <div style={{ display: "flex", justifyContent: "flex-end" }}>
+                  <p
+                    style={{
+                      margin: 0,
+                      maxWidth: "40rem",
+                      background: "var(--primary)",
+                      color: "var(--primary-foreground)",
+                      borderRadius: "22px 22px 8px 22px",
+                      padding: "12px 16px",
+                      fontSize: 15,
+                      lineHeight: 1.7,
+                    }}
+                  >
                     {turn.question}
                   </p>
                 </div>
+                <div style={{ marginTop: 12 }}>
                 {turn.pending ? (
-                  <div className="bg-muted/50 max-w-[46rem] rounded-3xl rounded-bl-lg px-5 py-4">
+                  <div
+                    style={{
+                      maxWidth: "46rem",
+                      background: "var(--muted)",
+                      borderRadius: "22px 22px 22px 8px",
+                      padding: "16px 20px",
+                    }}
+                  >
                     <p className="text-muted-foreground flex items-center gap-2 text-sm">
                       <LoaderCircleIcon className="size-4 animate-spin" />
                       Suche in den Unterlagen…
@@ -119,14 +138,20 @@ export function ChatPanel({
                   </div>
                 ) : turn.error ? (
                   <div
-                    className="border-destructive/30 bg-destructive/5 text-destructive max-w-[46rem] rounded-3xl px-5 py-4 text-sm leading-6"
+                    className="border-destructive/30 bg-destructive/5 text-destructive text-sm leading-6"
                     role="alert"
+                    style={{
+                      maxWidth: "46rem",
+                      borderRadius: 18,
+                      padding: "16px 20px",
+                    }}
                   >
                     {turn.error}
                   </div>
                 ) : (
                   <AnswerCard turn={turn} />
                 )}
+                </div>
               </li>
             ))}
           </ol>
@@ -284,8 +309,13 @@ function EmptyChat({
 function AnswerCard({ turn }: { turn: ChatTurn }) {
   return (
     <article
-      className="bg-muted/40 max-w-[46rem] rounded-3xl rounded-bl-lg px-5 py-4"
-      style={{ position: "relative" }}
+      style={{
+        position: "relative",
+        maxWidth: "46rem",
+        background: "#eef0f3",
+        borderRadius: "22px 22px 22px 8px",
+        padding: "16px 20px 12px",
+      }}
     >
       <div className="mb-3 flex flex-wrap items-center gap-2">
         <Badge variant="secondary">
@@ -294,7 +324,14 @@ function AnswerCard({ turn }: { turn: ChatTurn }) {
             : "Auszug aus den Unterlagen"}
         </Badge>
       </div>
-      <p className="text-[1.02rem] leading-8 whitespace-pre-wrap">
+      <p
+        style={{
+          margin: 0,
+          fontSize: 16,
+          lineHeight: 1.7,
+          whiteSpace: "pre-wrap",
+        }}
+      >
         {turn.answer}
       </p>
       {turn.fallbackReason ? (
@@ -342,14 +379,16 @@ function SourceFootnote({
 }) {
   const buttonRef = useRef<HTMLButtonElement>(null);
   const [open, setOpen] = useState(false);
-  const [pos, setPos] = useState({ top: 0, right: 0 });
+  const [pos, setPos] = useState({ top: 0, right: 0, below: false });
 
   const place = () => {
     const rect = buttonRef.current?.getBoundingClientRect();
     if (!rect) return;
+    const below = rect.top < 280;
     setPos({
-      top: rect.top,
-      right: window.innerWidth - rect.right,
+      top: below ? rect.bottom : rect.top,
+      right: Math.max(12, window.innerWidth - rect.right),
+      below,
     });
   };
 
@@ -396,7 +435,9 @@ function SourceFootnote({
                 position: "fixed",
                 top: pos.top,
                 right: pos.right,
-                transform: "translateY(calc(-100% - 8px))",
+                transform: pos.below
+                  ? "translateY(8px)"
+                  : "translateY(calc(-100% - 8px))",
                 width: "min(320px, calc(100vw - 24px))",
                 maxHeight: 240,
                 overflowY: "auto",
