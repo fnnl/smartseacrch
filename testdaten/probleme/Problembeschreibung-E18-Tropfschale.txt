@@ -1,0 +1,17 @@
+Problembeschreibung: E18 Tropfschale nach der Spülmaschine
+
+Anlage: KV-800, Kantinentheke
+Datum: 28. März 2026
+Gemeldet von: Thekendienst
+
+Sachverhalt
+Nach der Mittagspause zeigt der KV-800 E18, obwohl die Tropfschale leer wirkt. Die Schale war in der Spülmaschine bei 65 °C mitgelaufen. Sensor TS-4 ist noch feucht und die Schale sitzt leicht schief, Ablaufschlauch hat eine Schleife.
+
+Bisherige Schritte
+Schale entnommen, abgetrocknet, 10 Sekunden gewartet. E18 blieb, bis der Ablaufschlauch glattgezogen wurde. Danach Bereit.
+
+Verdacht
+Laut Fehlermeldungsübersicht kommt E18 am KV-800 auch bei geknicktem Ablaufschlauch. Zusätzlich löst ein nasser Sensor TS-4 die Meldung aus. Die Spülmaschine neben dem Automaten ist laut Inbetriebnahme KV-400/Aufstellregeln ungünstig — Dampf kann TS-4 täuschen. Der KV-800 selbst darf mit festem Ablauf betrieben werden, der Schlauch muss Gefälle ohne Knick haben.
+
+Nächster Schritt
+Ablaufschlauch mit Gefälle verlegen, TS-4 nur trocken einsetzen, Tropfschale nicht mehr in die Spülmaschine. Wiederholt E18: TS-4 bestellen.

@@ -54,6 +54,10 @@ Danach liegen die Dateien in `release/`:
 
 Ein Tag `v0.1.0` löst den Windows-Build aus und legt die Dateien unter Releases ab.
 
+## Testdaten
+
+Im Ordner `testdaten/` liegen fiktive Handbücher und Problembeschreibungen (Nordlicht KV-400 / KV-800), nur zum Ausprobieren der Suche. Über **Verwaltung** den Ordner indexieren.
+
 ## Entwicklung
 
 ```bash

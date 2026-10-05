@@ -1,0 +1,20 @@
+Problembeschreibung: Display zeigt E12
+
+Anlage: Kaffeevollautomat KV-400, Standort Küche 2
+Datum: 12. März 2026
+Gemeldet von: Schichtleitung Frühdienst
+
+Sachverhalt
+Das Gerät bricht den Bezug ab und zeigt dauerhaft E12 / Wassertank. Der Tank ist sichtbar gefüllt. Nach dem Abnehmen und Wiedereinsetzen bleibt die Meldung bestehen. Der letzte Filterwechsel liegt nach Aktenlage acht Monate zurück.
+
+Bisherige Schritte
+1. Tank entnommen, Dichtung DT-9 optisch geprüft, keine Risse sichtbar.
+2. Schwimmerklappe SK-2 bewegt sich schwergängig und bleibt oben hängen.
+3. Gerät neu gestartet. E12 kommt nach etwa 20 Sekunden wieder.
+4. Technischer Dienst noch nicht verständigt.
+
+Verdacht
+Der überfällige Wasserfilter WF-400 und die klemmende Schwimmerklappe täuschen einen leeren Tank vor. Laut Fehlermeldungsübersicht kann E12 durch einen verbrauchten Filter, eine blockierte Schwimmerklappe oder eine undichte Zuleitung zur Pumpe PU-220 ausgelöst werden.
+
+Nächster Schritt
+Filter WF-400 tauschen (bei 17 °dH Intervall 6 Wochen), SK-2 gängig machen, Programm Filterwechsel bestätigen. Wenn E12 danach bleibt, Pumpenzuleitung prüfen und Hauser-Kaffee Technik München unter 089 4012-880 rufen.
