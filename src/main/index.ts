@@ -20,13 +20,21 @@ import { filesFromPaths } from "@/lib/from-disk";
 import { ingestIncomingFiles } from "@/lib/ingest";
 import { buildSampleFiles } from "@/lib/sample-docs";
 import {
+  createChat,
+  deleteChat,
+  loadChats,
+  saveChat,
+  selectChat,
+  setChatsDir,
+} from "@/lib/chats";
+import {
   clearStore,
   configuredAnswerMode,
   loadStore,
   removeDocument,
   setDataDir,
 } from "@/lib/store";
-import type { IngestResponse, LibraryResponse } from "@/lib/types";
+import type { ChatSession, IngestResponse, LibraryResponse } from "@/lib/types";
 
 function libraryFromStore(
   store: Awaited<ReturnType<typeof loadStore>>,
@@ -188,6 +196,22 @@ function registerIpc(): void {
     return clearLogo();
   });
 
+  ipcMain.handle("chats:load", async () => loadChats());
+
+  ipcMain.handle("chats:create", async () => createChat());
+
+  ipcMain.handle("chats:select", async (_event, id: string) =>
+    selectChat(typeof id === "string" ? id : ""),
+  );
+
+  ipcMain.handle("chats:save", async (_event, chat: ChatSession) =>
+    saveChat(chat),
+  );
+
+  ipcMain.handle("chats:delete", async (_event, id: string) =>
+    deleteChat(typeof id === "string" ? id : ""),
+  );
+
   ipcMain.handle("ask", async (_event, question: string) => {
     const trimmed = question.trim();
     if (!trimmed) {
@@ -209,6 +233,7 @@ app.whenReady().then(async () => {
   setDataDir(dataDir);
   setBrandingDir(dataDir);
   setAdminDir(dataDir);
+  setChatsDir(dataDir);
   registerIpc();
   await createWindow();
 

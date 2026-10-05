@@ -1,20 +1,10 @@
+import { createPortal } from "react-dom";
 import { BookOpenIcon, LoaderCircleIcon, SendIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 import { ActionButton } from "@/components/action-button";
 import { Badge } from "@/components/ui/badge";
-import type { AnswerMode, AskResponse, SourceHit } from "@/lib/types";
-
-export type ChatTurn = {
-  id: string;
-  question: string;
-  answer?: string;
-  sources?: SourceHit[];
-  mode?: AnswerMode;
-  fallbackReason?: string;
-  error?: string;
-  pending?: boolean;
-};
+import type { AnswerMode, AskResponse, ChatTurn, SourceHit } from "@/lib/types";
 
 type ChatPanelProps = {
   turns: ChatTurn[];
@@ -78,11 +68,11 @@ export function ChatPanel({
         }}
       >
         <div className="max-w-2xl">
-          <h2 className="font-heading text-xl tracking-tight">Fragen</h2>
+          <h2 className="font-heading text-xl tracking-tight">Chat</h2>
           <p className="mt-1.5 text-[0.95rem] leading-7 text-muted-foreground">
             {ready
-              ? "Die Antwort zeigt die Stelle, aus der sie stammt."
-              : "Sobald Unterlagen indexiert sind, kannst du nach Fehlern, Schritten und Teilen fragen."}
+              ? "Mehrere Fragen hintereinander zu denselben Unterlagen. Quellen stehen klein unten rechts."
+              : "Sobald Unterlagen indexiert sind, kannst du in einem Chat nach Fehlern, Schritten und Teilen fragen."}
           </p>
         </div>
         <Badge variant="outline" className="hidden shrink-0 sm:inline-flex">
@@ -183,7 +173,7 @@ export function ChatPanel({
             }}
             placeholder={
               ready
-                ? "Schreibe hier deine Frage, z. B. Was bedeutet Fehler E12?"
+                ? "Nächste Frage in diesem Chat, z. B. Und wie oft muss ich entkalken?"
                 : "Zuerst muss die Verwaltung Unterlagen hinterlegen — dann hier die Frage eingeben"
             }
             disabled={asking || !ready}
@@ -264,12 +254,12 @@ function EmptyChat({
       <div>
         <p className="font-heading text-2xl tracking-tight">
           {ready
-            ? "Frag, als würdest du im Ordner blättern"
+            ? "Stelle mehrere Fragen in diesem Chat"
             : "Lade zuerst deine Unterlagen"}
         </p>
         <p className="mt-3 text-[0.95rem] leading-7 text-muted-foreground">
           {ready
-            ? "Eine normale Frage reicht. Die Antwort bleibt an der Quelle kleben."
+            ? "Die indexierten Dateien bleiben dieselben. Ein neuer Chat beginnt eine neue Unterhaltung, ohne den Index zu ändern."
             : "Die Verwaltung hinterlegt die Handbücher und Problembeschreibungen. Danach die Frage ins Feld unten schreiben."}
         </p>
       </div>
@@ -293,7 +283,10 @@ function EmptyChat({
 
 function AnswerCard({ turn }: { turn: ChatTurn }) {
   return (
-    <article className="bg-muted/40 max-w-[46rem] rounded-3xl rounded-bl-lg px-5 py-4">
+    <article
+      className="bg-muted/40 max-w-[46rem] rounded-3xl rounded-bl-lg px-5 py-4"
+      style={{ position: "relative" }}
+    >
       <div className="mb-3 flex flex-wrap items-center gap-2">
         <Badge variant="secondary">
           {turn.mode === "generative"
@@ -310,53 +303,142 @@ function AnswerCard({ turn }: { turn: ChatTurn }) {
         </p>
       ) : null}
       {turn.sources && turn.sources.length > 0 ? (
-        <div className="mt-5 border-t border-border/70 pt-4">
-          <p className="text-xs font-medium tracking-[0.14em] text-muted-foreground uppercase">
-            Quellen
-          </p>
-          <ol className="mt-3 space-y-3">
-            {turn.sources.map((source, index) => (
-              <SourceRow
-                key={`${source.documentId}-${source.chunkIndex}`}
-                source={source}
-                index={index}
-              />
-            ))}
-          </ol>
-        </div>
+        <SourceFootnotes sources={turn.sources} />
       ) : null}
     </article>
   );
 }
 
-function SourceRow({ source, index }: { source: SourceHit; index: number }) {
-  const [open, setOpen] = useState(index === 0);
+function SourceFootnotes({ sources }: { sources: SourceHit[] }) {
+  return (
+    <div
+      aria-label="Quellen"
+      style={{
+        display: "flex",
+        justifyContent: "flex-end",
+        alignItems: "center",
+        flexWrap: "wrap",
+        gap: 6,
+        marginTop: 10,
+      }}
+    >
+      {sources.map((source, index) => (
+        <SourceFootnote
+          key={`${source.documentId}-${source.chunkIndex}-${index}`}
+          source={source}
+          index={index}
+        />
+      ))}
+    </div>
+  );
+}
+
+function SourceFootnote({
+  source,
+  index,
+}: {
+  source: SourceHit;
+  index: number;
+}) {
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const [open, setOpen] = useState(false);
+  const [pos, setPos] = useState({ top: 0, right: 0 });
+
+  const place = () => {
+    const rect = buttonRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    setPos({
+      top: rect.top,
+      right: window.innerWidth - rect.right,
+    });
+  };
+
+  const show = () => {
+    place();
+    setOpen(true);
+  };
+
+  const hide = () => setOpen(false);
 
   return (
-    <li className="bg-card/80 rounded-2xl px-4 py-3">
+    <>
       <button
+        ref={buttonRef}
         type="button"
-        className="flex w-full items-start justify-between gap-4 text-left"
-        onClick={() => setOpen((value) => !value)}
+        aria-label={`Quelle ${index + 1}: ${source.fileName}, Stelle ${source.chunkIndex + 1}`}
         aria-expanded={open}
+        onMouseEnter={show}
+        onMouseLeave={hide}
+        onFocus={show}
+        onBlur={hide}
+        style={{
+          minWidth: 22,
+          height: 22,
+          padding: "0 6px",
+          borderRadius: 999,
+          border: "1px solid var(--border)",
+          background: "#ffffff",
+          color: "var(--primary)",
+          fontSize: 11,
+          fontWeight: 700,
+          fontFamily: "inherit",
+          lineHeight: "20px",
+          cursor: "default",
+        }}
       >
-        <span className="text-sm leading-6 font-medium">
-          {index + 1}. {source.fileName}
-          <span className="text-muted-foreground font-normal">
-            {" "}
-            · Stelle {source.chunkIndex + 1}
-          </span>
-        </span>
-        <span className="text-muted-foreground text-xs">
-          {open ? "Passage schließen" : "Passage zeigen"}
-        </span>
+        {index + 1}
       </button>
-      {open ? (
-        <blockquote className="text-muted-foreground mt-2 border-l-2 border-primary/40 pl-3 text-sm leading-7">
-          {source.passage}
-        </blockquote>
-      ) : null}
-    </li>
+      {open
+        ? createPortal(
+            <div
+              role="tooltip"
+              style={{
+                position: "fixed",
+                top: pos.top,
+                right: pos.right,
+                transform: "translateY(calc(-100% - 8px))",
+                width: "min(320px, calc(100vw - 24px))",
+                maxHeight: 240,
+                overflowY: "auto",
+                zIndex: 90,
+                background: "#ffffff",
+                color: "var(--foreground)",
+                border: "1px solid var(--border)",
+                borderRadius: 12,
+                boxShadow: "0 8px 24px rgba(27, 31, 36, 0.16)",
+                padding: "10px 12px 12px",
+                pointerEvents: "none",
+              }}
+            >
+              <p
+                style={{
+                  margin: 0,
+                  fontSize: 12,
+                  fontWeight: 700,
+                  lineHeight: 1.4,
+                }}
+              >
+                {source.fileName}
+                <span style={{ fontWeight: 500, color: "#5c6570" }}>
+                  {" "}
+                  · Stelle {source.chunkIndex + 1}
+                </span>
+              </p>
+              <p
+                style={{
+                  margin: "8px 0 0",
+                  fontSize: 13,
+                  lineHeight: 1.55,
+                  color: "#3d444c",
+                }}
+              >
+                {source.passage}
+              </p>
+            </div>,
+            document.body,
+          )
+        : null}
+    </>
   );
 }
 
@@ -371,5 +453,6 @@ export function turnFromResponse(
     sources: response.sources,
     mode: response.mode,
     fallbackReason: response.fallbackReason,
+    createdAt: new Date().toISOString(),
   };
 }

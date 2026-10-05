@@ -37,6 +37,31 @@ export type AskResponse = {
   fallbackReason?: string;
 };
 
+export type ChatTurn = {
+  id: string;
+  question: string;
+  answer?: string;
+  sources?: SourceHit[];
+  mode?: AnswerMode;
+  fallbackReason?: string;
+  error?: string;
+  pending?: boolean;
+  createdAt: string;
+};
+
+export type ChatSession = {
+  id: string;
+  title: string;
+  createdAt: string;
+  updatedAt: string;
+  turns: ChatTurn[];
+};
+
+export type ChatsSnapshot = {
+  chats: ChatSession[];
+  activeId: string | null;
+};
+
 export type SkippedFile = {
   name: string;
   reason: string;

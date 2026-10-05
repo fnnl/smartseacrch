@@ -25,8 +25,9 @@ Node.js, Internet und ein Server sind nicht nötig. Der Index bleibt auf diesem 
 
 ## Bedienung (Suche)
 
-1. Unten ins Feld **Deine Frage** schreiben, z. B. «Was bedeutet Fehler E12?», dann **Frage senden**.
-2. Die Antwort nennt Datei und Stelle
+1. Links **Neuer Chat** oder einen früheren Chat wählen. Die Unterhaltungen bleiben auf diesem Rechner (Benutzerordner der App), ohne Server.
+2. Unten ins Feld **Deine Frage** schreiben, z. B. «Was bedeutet Fehler E12?», dann **Frage senden**. Weitere Fragen gehören zu demselben Chat und denselben Unterlagen.
+3. Quellen stehen als kleine Zahlen unten rechts an der Antwort. Darüberfahren zeigt Datei, Stelle und Passage.
 
 ## Verwaltung (Quellen)
 

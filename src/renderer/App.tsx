@@ -4,11 +4,13 @@ import { AdminPanel } from "@/components/admin-panel";
 import {
   ChatPanel,
   turnFromResponse,
-  type ChatTurn,
 } from "@/components/chat-panel";
+import { ChatSidebar } from "@/components/chat-sidebar";
 import type {
   AnswerMode,
   AskResponse,
+  ChatSession,
+  ChatTurn,
   IngestResponse,
   LibraryDocument,
   LibraryResponse,
@@ -21,7 +23,8 @@ export function App() {
   const [notice, setNotice] = useState<string | null>(null);
   const [ingesting, setIngesting] = useState(false);
   const [asking, setAsking] = useState(false);
-  const [turns, setTurns] = useState<ChatTurn[]>([]);
+  const [chats, setChats] = useState<ChatSession[]>([]);
+  const [activeId, setActiveId] = useState<string | null>(null);
   const [logoDataUrl, setLogoDataUrl] = useState<string | null>(null);
   const [documents, setDocuments] = useState<LibraryDocument[]>([]);
   const [adminOpen, setAdminOpen] = useState(false);
@@ -30,6 +33,11 @@ export function App() {
     setReady(data.chunkCount > 0);
     setDocuments(data.documents);
     if ("answerMode" in data) setAnswerMode(data.answerMode);
+  };
+
+  const applyChats = (data: { chats: ChatSession[]; activeId: string | null }) => {
+    setChats(data.chats);
+    setActiveId(data.activeId);
   };
 
   useEffect(() => {
@@ -42,6 +50,10 @@ export function App() {
     void window.smartsearch
       .getBranding()
       .then((branding) => setLogoDataUrl(branding.logoDataUrl))
+      .catch(() => undefined);
+    void window.smartsearch
+      .loadChats()
+      .then(applyChats)
       .catch(() => undefined);
   }, []);
 
@@ -58,6 +70,9 @@ export function App() {
     window.addEventListener("scroll", pin, { capture: true });
     return () => window.removeEventListener("scroll", pin, { capture: true });
   }, []);
+
+  const activeChat = chats.find((chat) => chat.id === activeId) ?? chats[0];
+  const turns = activeChat?.turns ?? [];
 
   const runIngest = async (work: () => Promise<IngestResponse | null>) => {
     setIngesting(true);
@@ -82,43 +97,69 @@ export function App() {
     }
   };
 
+  const patchActiveTurns = (updater: (current: ChatTurn[]) => ChatTurn[]) => {
+    setChats((current) =>
+      current.map((chat) =>
+        chat.id === (activeChat?.id ?? activeId)
+          ? { ...chat, turns: updater(chat.turns), updatedAt: new Date().toISOString() }
+          : chat,
+      ),
+    );
+  };
+
   const ask = async (question: string) => {
+    if (!activeChat) return;
     const pendingId = crypto.randomUUID();
-    setTurns((current) => [
-      ...current,
-      { id: pendingId, question, pending: true },
-    ]);
+    const pending: ChatTurn = {
+      id: pendingId,
+      question,
+      pending: true,
+      createdAt: new Date().toISOString(),
+    };
+    patchActiveTurns((current) => [...current, pending]);
     setAsking(true);
     try {
       const data = await window.smartsearch.ask(question);
       if (data.error) {
-        setTurns((current) =>
-          current.map((turn) =>
-            turn.id === pendingId
-              ? { ...turn, pending: false, error: data.error }
-              : turn,
-          ),
+        const failed: ChatTurn = {
+          id: pendingId,
+          question,
+          pending: false,
+          error: data.error,
+          createdAt: pending.createdAt,
+        };
+        patchActiveTurns((current) =>
+          current.map((turn) => (turn.id === pendingId ? failed : turn)),
         );
+        const withError = {
+          ...activeChat,
+          turns: [...activeChat.turns.filter((turn) => turn.id !== pendingId), failed],
+        };
+        applyChats(await window.smartsearch.saveChat(withError));
         return;
       }
-      const next = turnFromResponse(question, data as AskResponse);
-      setTurns((current) =>
-        current.map((turn) =>
-          turn.id === pendingId ? { ...next, id: pendingId } : turn,
-        ),
-      );
+      const next = {
+        ...turnFromResponse(question, data as AskResponse),
+        id: pendingId,
+      };
+      const saved = {
+        ...activeChat,
+        turns: [...activeChat.turns.filter((turn) => turn.id !== pendingId), next],
+      };
+      applyChats(await window.smartsearch.saveChat(saved));
     } catch {
-      setTurns((current) =>
-        current.map((turn) =>
-          turn.id === pendingId
-            ? {
-                ...turn,
-                pending: false,
-                error: "Die Suche ist fehlgeschlagen.",
-              }
-            : turn,
-        ),
-      );
+      const failed: ChatTurn = {
+        id: pendingId,
+        question,
+        pending: false,
+        error: "Die Suche ist fehlgeschlagen.",
+        createdAt: pending.createdAt,
+      };
+      const saved = {
+        ...activeChat,
+        turns: [...activeChat.turns.filter((turn) => turn.id !== pendingId), failed],
+      };
+      applyChats(await window.smartsearch.saveChat(saved));
     } finally {
       setAsking(false);
     }
@@ -164,8 +205,8 @@ export function App() {
                 SmartSeacrch
               </h1>
               <p className="mt-1.5 text-sm leading-6 text-muted-foreground md:text-[0.95rem]">
-                Fragen an Handbücher und Problembeschreibungen — lokal, ohne
-                Server
+                Fragen an Handbücher — lokal, ohne Server, Chats bleiben auf
+                diesem Rechner
               </p>
             </div>
           </div>
@@ -223,7 +264,7 @@ export function App() {
             minHeight: 0,
             minWidth: 0,
             display: "flex",
-            flexDirection: "column",
+            flexDirection: "row",
             overflow: "hidden",
             background: "var(--card)",
             borderRadius: "1.75rem 1.75rem 0 0",
@@ -231,6 +272,19 @@ export function App() {
               "inset 0 0 0 1px color-mix(in srgb, var(--foreground) 8%, transparent)",
           }}
         >
+          <ChatSidebar
+            chats={chats}
+            activeId={activeChat?.id ?? activeId}
+            onNew={() => {
+              void window.smartsearch.createChat().then(applyChats);
+            }}
+            onSelect={(id) => {
+              void window.smartsearch.selectChat(id).then(applyChats);
+            }}
+            onDelete={(id) => {
+              void window.smartsearch.deleteChat(id).then(applyChats);
+            }}
+          />
           <ChatPanel
             turns={turns}
             ready={ready}
@@ -276,7 +330,6 @@ export function App() {
         }}
         onClear={async () => {
           applyLibrary(await window.smartsearch.clear());
-          setTurns([]);
           setNotice(null);
         }}
         onRemove={async (documentId) => {

@@ -4,6 +4,8 @@ import type { AdminStatus } from "@/lib/admin";
 import type { Branding } from "@/lib/branding";
 import type {
   AskResponse,
+  ChatSession,
+  ChatsSnapshot,
   IngestResponse,
   LibraryResponse,
 } from "@/lib/types";
@@ -26,6 +28,11 @@ export type SmartsearchApi = {
   ask: (
     question: string,
   ) => Promise<AskResponse & { error?: string }>;
+  loadChats: () => Promise<ChatsSnapshot>;
+  createChat: () => Promise<ChatsSnapshot>;
+  selectChat: (id: string) => Promise<ChatsSnapshot>;
+  saveChat: (chat: ChatSession) => Promise<ChatsSnapshot>;
+  deleteChat: (id: string) => Promise<ChatsSnapshot>;
   pathForFile: (file: File) => string;
 };
 
@@ -46,6 +53,11 @@ const api: SmartsearchApi = {
   adminLogin: (password) => ipcRenderer.invoke("admin:login", password),
   adminLogout: () => ipcRenderer.invoke("admin:logout"),
   ask: (question) => ipcRenderer.invoke("ask", question),
+  loadChats: () => ipcRenderer.invoke("chats:load"),
+  createChat: () => ipcRenderer.invoke("chats:create"),
+  selectChat: (id) => ipcRenderer.invoke("chats:select", id),
+  saveChat: (chat) => ipcRenderer.invoke("chats:save", chat),
+  deleteChat: (id) => ipcRenderer.invoke("chats:delete", id),
   pathForFile: (file) => webUtils.getPathForFile(file),
 };
 
