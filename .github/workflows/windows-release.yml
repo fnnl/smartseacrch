@@ -40,11 +40,10 @@ jobs:
           files: |
             release/SmartSeacrch-Setup-*.exe
             release/SmartSeacrch-Portable-*.exe
-            release/SmartSeacrch-*-win.zip
           body: |
             Windows-Programm, ohne Server. Auf dem eigenen Rechner starten.
 
-            - **SmartSeacrch-Setup-0.1.0.exe** — Installer (Startmenü und Desktop-Verknüpfung)
-            - **SmartSeacrch-Portable-0.1.0.exe** — eine Datei kopieren und doppelklicken
+            - **SmartSeacrch-Setup-*.exe** — Installer (Startmenü und Desktop-Verknüpfung)
+            - **SmartSeacrch-Portable-*.exe** — eine Datei kopieren und doppelklicken
 
             Bei der Windows-Warnung: «Weitere Informationen» → «Trotzdem ausführen».

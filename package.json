@@ -1,6 +1,6 @@
 {
   "name": "smartseacrch",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "description": "Lokale Suche in Handbüchern und Problembeschreibungen",
   "author": "Dominik Senn",
@@ -10,7 +10,7 @@
     "start": "electron-vite preview",
     "build": "electron-vite build",
     "dist": "electron-vite build && electron-builder",
-    "dist:win": "electron-vite build && electron-builder --win --config.win.signAndEditExecutable=false",
+    "dist:win": "electron-vite build && electron-builder --win portable nsis --x64 --config.win.signAndEditExecutable=false",
     "dist:mac": "electron-vite build && electron-builder --mac",
     "dist:linux": "electron-vite build && electron-builder --linux",
     "install:desktop": "bash scripts/install-linux-desktop.sh",
@@ -65,10 +65,10 @@
       "icon": "resources/icon.ico",
       "target": [
         { "target": "nsis", "arch": ["x64"] },
-        { "target": "portable", "arch": ["x64"] },
-        { "target": "zip", "arch": ["x64"] }
+        { "target": "portable", "arch": ["x64"] }
       ],
-      "verifyUpdateCodeSignature": false
+      "verifyUpdateCodeSignature": false,
+      "signAndEditExecutable": false
     },
     "mac": {
       "target": ["dmg"],

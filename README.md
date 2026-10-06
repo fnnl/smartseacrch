@@ -6,20 +6,16 @@ Repository: https://github.com/fnnl/smartseacrch
 
 ## Für Kolleginnen und Kollegen (Windows)
 
-Fertige Dateien: https://github.com/fnnl/smartseacrch/releases/latest
+Fertige Dateien: https://github.com/fnnl/smartseacrch/releases/latest  
+Aktuell: **v0.1.1** (`SmartSeacrch-Setup-0.1.1.exe` und `SmartSeacrch-Portable-0.1.1.exe`).
 
 1. Eine Datei herunterladen:
-   - **SmartSeacrch-Setup-0.1.0.exe** — Installation mit Verknüpfung im Startmenü und auf dem Desktop
-   - **SmartSeacrch-Portable-0.1.0.exe** — eine Datei kopieren, nicht installieren (USB-Stick oder Ordner)
-2. Doppelklicken. Erscheint eine Windows-Warnung («Unbekannter Herausgeber»): **Weitere Informationen** → **Trotzdem ausführen**
+   - **SmartSeacrch-Setup-0.1.1.exe** — Installation (Verknüpfung im Startmenü und auf dem Desktop). Danach **SmartSeacrch** aus dem Startmenü öffnen.
+   - **SmartSeacrch-Portable-0.1.1.exe** — nur diese eine Datei kopieren (USB-Stick oder Ordner). **Doppelklicken**, nicht installieren. Optional den Ordner `SmartSeacrch-Daten` daneben legen, dann bleiben Index und Dateikopien beim Stick.
+2. Erscheint eine Windows-Warnung («Windows hat den Computer geschützt» / unbekannter Herausgeber): **Weitere Informationen** → **Trotzdem ausführen**. Die Datei ist nicht code-signiert.
 3. Unten eine Frage eintippen. Unterlagen legt die **Verwaltung** an (nicht jede Person).
 
-SHA-256 (v0.1.0):
-
-```
-45826c16ababb426e3c82574150785ea9b5b1ec81ee484959df7592d3823dd1a  SmartSeacrch-Setup-0.1.0.exe
-791462607737f0119b4d7f9acf9af9f8c994b100cd73e470d6bb2f3a637ba03f  SmartSeacrch-Portable-0.1.0.exe
-```
+SHA-256 steht in `SHA256SUMS.txt` neben den Dateien (GitHub Release und Build-Ausgabe). Nach dem lokalen Paketieren hier eintragen.
 
 Node.js, Internet und ein Server sind nicht nötig. Der Index und Kopien der Dateien bleiben auf diesem PC.
 
@@ -59,19 +55,19 @@ Ohne API-Key: Antworten sind Auszüge aus den Dokumenten. Optional `OPENAI_API_K
 
 ## Windows-Paket selbst bauen
 
-Auf einem Windows-Rechner oder per GitHub Actions:
+Auf einem Windows-Rechner (empfohlen) oder unter Linux mit Wine:
 
 ```bash
 npm install
-npm run dist:win
+CSC_IDENTITY_AUTO_DISCOVERY=false npm run dist:win
 ```
 
 Danach liegen die Dateien in `release/`:
 
-- `SmartSeacrch-Setup-0.1.0.exe`
-- `SmartSeacrch-Portable-0.1.0.exe`
+- `SmartSeacrch-Setup-0.1.1.exe` — NSIS-Installer
+- `SmartSeacrch-Portable-0.1.1.exe` — portable Einzeldatei
 
-Ein Tag `v0.1.0` löst den Windows-Build aus und legt die Dateien unter Releases ab.
+Ein Git-Tag `v0.1.1` (Muster `v*`) startet GitHub Actions auf `windows-latest` und legt die Dateien unter [Releases](https://github.com/fnnl/smartseacrch/releases) ab.
 
 ## Testdaten
 
