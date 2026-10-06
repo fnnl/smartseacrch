@@ -96,9 +96,10 @@ export function WorkspaceBar({
               maxWidth: "100%",
             }}
           >
-            Ordner oder Dateien von diesem Rechner wählen. SmartSeacrch liest
-            Word, PDF und Text lokal — nichts geht ins Netz. Dateien hierher
-            ziehen geht auch.
+            Ordner oder Dateien von diesem Rechner wählen. SmartSeacrch legt
+            Kopien im Datenordner ab — beim nächsten Start nicht erneut
+            einlesen. Word, PDF und Text bleiben lokal, nichts geht ins Netz.
+            Dateien hierher ziehen geht auch.
           </p>
         </div>
         <div
@@ -201,7 +202,16 @@ export function WorkspaceBar({
       ) : null}
 
       {notice ? (
-        <p style={{ margin: 0, fontSize: 14, color: "var(--primary)", fontWeight: 600 }}>
+        <p
+          style={{
+            margin: 0,
+            fontSize: 14,
+            color: "var(--primary)",
+            fontWeight: 600,
+            whiteSpace: "pre-wrap",
+            wordBreak: "break-word",
+          }}
+        >
           {notice}
         </p>
       ) : null}

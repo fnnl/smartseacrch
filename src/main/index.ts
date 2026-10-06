@@ -1,5 +1,5 @@
-import { app, BrowserWindow, dialog, ipcMain, screen } from "electron";
-import { mkdir, writeFile } from "node:fs/promises";
+import { app, BrowserWindow, dialog, ipcMain, screen, shell } from "electron";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 
 import { answerQuestion } from "@/lib/answer";
@@ -17,8 +17,16 @@ import {
   saveLogoFromPath,
   setBrandingDir,
 } from "@/lib/branding";
+import { chooseDataLocation } from "@/lib/data-location";
 import { filesFromPaths } from "@/lib/from-disk";
 import { ingestIncomingFiles } from "@/lib/ingest";
+import {
+  buildLibraryZip,
+  copyLibraryFolder,
+  importLibraryZip,
+} from "@/lib/library-pack";
+import { migrateLibraryOriginals } from "@/lib/migrate-originals";
+import { originalsDir } from "@/lib/originals";
 import { openSourceHit } from "@/lib/open-source";
 import { buildSampleFiles } from "@/lib/sample-docs";
 import {
@@ -37,7 +45,13 @@ import {
   removeDocument,
   setDataDir,
 } from "@/lib/store";
-import type { ChatSession, IngestResponse, LibraryResponse, SourceHit } from "@/lib/types";
+import type {
+  ChatSession,
+  IngestResponse,
+  LibraryLocation,
+  LibraryResponse,
+  SourceHit,
+} from "@/lib/types";
 
 function libraryFromStore(
   store: Awaited<ReturnType<typeof loadStore>>,
@@ -151,21 +165,112 @@ function registerIpc(): void {
   ipcMain.handle("ingest:sample", async () => {
     requireAdmin();
     const samples = await buildSampleFiles();
-    const originals = path.join(getDataDir(), "originals");
-    await mkdir(originals, { recursive: true });
-    const files = [];
-    for (const file of samples) {
-      const dest = path.join(originals, file.name.replace(/[\\/]/g, "__"));
-      await writeFile(dest, file.bytes);
-      files.push({
+    return ingestIncomingFiles(
+      samples.map((file) => ({
         name: path.basename(file.name),
         displayPath: file.name,
-        sourcePath: dest,
         size: file.bytes.byteLength,
         bytes: file.bytes,
-      });
+      })),
+    );
+  });
+
+  ipcMain.handle("library:location", async (): Promise<LibraryLocation> => ({
+    dataDir: getDataDir(),
+    originalsDir: originalsDir(),
+    portable: currentLocation.portable,
+  }));
+
+  ipcMain.handle("library:open-folder", async () => {
+    requireAdmin();
+    await mkdir(getDataDir(), { recursive: true });
+    const error = await shell.openPath(getDataDir());
+    if (error) {
+      return { ok: false as const, error };
     }
-    return ingestIncomingFiles(files);
+    return { ok: true as const, path: getDataDir() };
+  });
+
+  ipcMain.handle("library:export", async () => {
+    requireAdmin();
+    const picked = await dialog.showSaveDialog({
+      title: "Bibliothek exportieren",
+      defaultPath: "SmartSeacrch-Bibliothek.zip",
+      filters: [{ name: "ZIP-Archiv", extensions: ["zip"] }],
+    });
+    if (picked.canceled || !picked.filePath) return null;
+    try {
+      const zip = await buildLibraryZip();
+      await writeFile(picked.filePath, zip);
+      return { ok: true as const, path: picked.filePath };
+    } catch (error) {
+      return {
+        ok: false as const,
+        error:
+          error instanceof Error
+            ? error.message
+            : "Die Bibliothek konnte nicht exportiert werden.",
+      };
+    }
+  });
+
+  ipcMain.handle("library:import", async () => {
+    requireAdmin();
+    const picked = await dialog.showOpenDialog({
+      title: "Bibliothek importieren",
+      properties: ["openFile"],
+      filters: [
+        { name: "SmartSeacrch-Bibliothek", extensions: ["zip"] },
+        { name: "Alle Dateien", extensions: ["*"] },
+      ],
+    });
+    if (picked.canceled || !picked.filePaths[0]) return null;
+    try {
+      const bytes = await readFile(picked.filePaths[0]);
+      const store = await importLibraryZip(bytes);
+      return {
+        documents: store.documents,
+        added: store.documents,
+        skipped: [],
+        chunkCount: store.chunks.length,
+      } satisfies IngestResponse;
+    } catch (error) {
+      return {
+        documents: (await loadStore()).documents,
+        added: [],
+        skipped: [
+          {
+            name: path.basename(picked.filePaths[0]),
+            reason:
+              error instanceof Error
+                ? error.message
+                : "Die ZIP-Datei konnte nicht gelesen werden.",
+          },
+        ],
+        chunkCount: (await loadStore()).chunks.length,
+      } satisfies IngestResponse;
+    }
+  });
+
+  ipcMain.handle("library:copy-folder", async () => {
+    requireAdmin();
+    const picked = await dialog.showOpenDialog({
+      title: "Ordner für SmartSeacrch-Daten wählen",
+      properties: ["openDirectory", "createDirectory"],
+    });
+    if (picked.canceled || !picked.filePaths[0]) return null;
+    try {
+      const dest = await copyLibraryFolder(picked.filePaths[0]);
+      return { ok: true as const, path: dest };
+    } catch (error) {
+      return {
+        ok: false as const,
+        error:
+          error instanceof Error
+            ? error.message
+            : "Der Datenordner konnte nicht kopiert werden.",
+      };
+    }
   });
 
   ipcMain.handle("admin:status", async () => adminStatus());
@@ -242,12 +347,20 @@ function registerIpc(): void {
   });
 }
 
+let currentLocation = {
+  dataDir: "",
+  originalsDir: "",
+  portable: false,
+};
+
 app.whenReady().then(async () => {
-  const dataDir = path.join(app.getPath("userData"), "data");
-  setDataDir(dataDir);
-  setBrandingDir(dataDir);
-  setAdminDir(dataDir);
-  setChatsDir(dataDir);
+  currentLocation = chooseDataLocation(app);
+  setDataDir(currentLocation.dataDir);
+  setBrandingDir(currentLocation.dataDir);
+  setAdminDir(currentLocation.dataDir);
+  setChatsDir(currentLocation.dataDir);
+  await mkdir(currentLocation.originalsDir, { recursive: true });
+  await migrateLibraryOriginals();
   registerIpc();
   await createWindow();
 

@@ -7,6 +7,8 @@ import type {
   ChatSession,
   ChatsSnapshot,
   IngestResponse,
+  LibraryLocation,
+  LibraryPackResult,
   LibraryResponse,
   SourceHit,
 } from "@/lib/types";
@@ -37,6 +39,11 @@ export type SmartsearchApi = {
   openSource: (
     source: SourceHit,
   ) => Promise<{ ok: true } | { ok: false; error: string }>;
+  libraryLocation: () => Promise<LibraryLocation>;
+  openLibraryFolder: () => Promise<LibraryPackResult>;
+  exportLibrary: () => Promise<LibraryPackResult | null>;
+  importLibrary: () => Promise<IngestResponse | null>;
+  copyLibraryFolder: () => Promise<LibraryPackResult | null>;
   pathForFile: (file: File) => string;
 };
 
@@ -63,6 +70,11 @@ const api: SmartsearchApi = {
   saveChat: (chat) => ipcRenderer.invoke("chats:save", chat),
   deleteChat: (id) => ipcRenderer.invoke("chats:delete", id),
   openSource: (source) => ipcRenderer.invoke("source:open", source),
+  libraryLocation: () => ipcRenderer.invoke("library:location"),
+  openLibraryFolder: () => ipcRenderer.invoke("library:open-folder"),
+  exportLibrary: () => ipcRenderer.invoke("library:export"),
+  importLibrary: () => ipcRenderer.invoke("library:import"),
+  copyLibraryFolder: () => ipcRenderer.invoke("library:copy-folder"),
   pathForFile: (file) => webUtils.getPathForFile(file),
 };
 

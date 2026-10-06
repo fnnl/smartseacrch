@@ -1,3 +1,4 @@
+import { absolutizeSourcePath } from "@/lib/originals";
 import type { Chunk, LibraryDocument, SourceHit } from "@/lib/types";
 
 export type SourceStore = {
@@ -41,8 +42,9 @@ export function resolveSourceFromStore(
       ? hit.sourcePath
       : undefined;
 
-  return {
-    path: fromHit || chunk?.sourcePath || document?.sourcePath,
-    page: hit?.page ?? chunk?.page,
-  };
+  const stored =
+    chunk?.sourcePath || document?.sourcePath || fromHit;
+  const resolvedPath = absolutizeSourcePath(stored) ?? stored;
+  const page = hit?.page ?? chunk?.page;
+  return { path: resolvedPath, page };
 }

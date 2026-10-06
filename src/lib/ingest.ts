@@ -6,6 +6,7 @@ import {
   isSupportedFileName,
 } from "@/lib/constants";
 import { chunksForDocument } from "@/lib/chunk";
+import { writeOriginalBytes } from "@/lib/originals";
 import { ParseError, extractDocumentText } from "@/lib/parse";
 import { loadStore, replaceDocuments } from "@/lib/store";
 import type {
@@ -58,13 +59,19 @@ export async function ingestIncomingFiles(
       continue;
     }
 
+    const id = randomUUID();
     try {
       const parsed = await extractDocumentText(file.name || label, file.bytes);
+      const storedRel = await writeOriginalBytes(
+        id,
+        file.name || label,
+        file.bytes,
+      );
       const document: LibraryDocument = {
-        id: randomUUID(),
+        id,
         fileName: baseName(file.name || label),
         displayPath: label,
-        sourcePath: file.sourcePath,
+        sourcePath: storedRel,
         format: parsed.format,
         size: file.size,
         chunkCount: 0,

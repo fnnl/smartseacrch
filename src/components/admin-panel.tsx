@@ -1,9 +1,16 @@
-import { LoaderCircleIcon, LockIcon, XIcon } from "lucide-react";
+import {
+  ArchiveIcon,
+  FolderOpenIcon,
+  FolderOutputIcon,
+  LoaderCircleIcon,
+  LockIcon,
+  XIcon,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { ActionButton } from "@/components/action-button";
 import { WorkspaceBar } from "@/components/workspace-bar";
-import type { LibraryDocument } from "@/lib/types";
+import type { LibraryDocument, LibraryLocation } from "@/lib/types";
 
 type AdminStatus = {
   hasPassword: boolean;
@@ -27,6 +34,10 @@ type AdminPanelProps = {
   onClearLogo: () => Promise<void> | void;
   onClear: () => Promise<void>;
   onRemove: (documentId: string) => Promise<void>;
+  onExportLibrary: () => Promise<void> | void;
+  onImportLibrary: () => Promise<void> | void;
+  onOpenLibraryFolder: () => Promise<void> | void;
+  onCopyLibraryFolder: () => Promise<void> | void;
 };
 
 export function AdminPanel({
@@ -46,12 +57,17 @@ export function AdminPanel({
   onClearLogo,
   onClear,
   onRemove,
+  onExportLibrary,
+  onImportLibrary,
+  onOpenLibraryFolder,
+  onCopyLibraryFolder,
 }: AdminPanelProps) {
   const [status, setStatus] = useState<AdminStatus | null>(null);
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [busy, setBusy] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
+  const [location, setLocation] = useState<LibraryLocation | null>(null);
 
   useEffect(() => {
     if (!open) return;
@@ -60,7 +76,12 @@ export function AdminPanel({
     setConfirm("");
     void window.smartsearch
       .adminStatus()
-      .then(setStatus)
+      .then(async (next) => {
+        setStatus(next);
+        if (next.unlocked) {
+          setLocation(await window.smartsearch.libraryLocation());
+        }
+      })
       .catch(() =>
         setFormError("Die Verwaltung konnte nicht geladen werden."),
       );
@@ -70,6 +91,11 @@ export function AdminPanel({
 
   const refresh = async () => {
     setStatus(await window.smartsearch.adminStatus());
+    try {
+      setLocation(await window.smartsearch.libraryLocation());
+    } catch {
+      setLocation(null);
+    }
   };
 
   const setup = async () => {
@@ -233,6 +259,14 @@ export function AdminPanel({
               onClearLogo={onClearLogo}
               onClear={onClear}
             />
+            <LibraryPortability
+              location={location}
+              ingesting={ingesting}
+              onExport={onExportLibrary}
+              onImport={onImportLibrary}
+              onOpenFolder={onOpenLibraryFolder}
+              onCopyFolder={onCopyLibraryFolder}
+            />
             <div style={{ marginTop: 20 }}>
               <p style={{ margin: 0, fontSize: 15, fontWeight: 700 }}>
                 Indexierte Dateien
@@ -273,6 +307,117 @@ export function AdminPanel({
           </div>
         )}
       </aside>
+    </div>
+  );
+}
+
+function LibraryPortability({
+  location,
+  ingesting,
+  onExport,
+  onImport,
+  onOpenFolder,
+  onCopyFolder,
+}: {
+  location: LibraryLocation | null;
+  ingesting: boolean;
+  onExport: () => Promise<void> | void;
+  onImport: () => Promise<void> | void;
+  onOpenFolder: () => Promise<void> | void;
+  onCopyFolder: () => Promise<void> | void;
+}) {
+  return (
+    <div
+      style={{
+        marginTop: 16,
+        borderRadius: 14,
+        border: "1px solid var(--border)",
+        background: "#f7f8fa",
+        padding: "14px 16px 16px",
+      }}
+    >
+      <p style={{ margin: 0, fontSize: 16, fontWeight: 700 }}>
+        Bleibt gespeichert, ohne Server
+      </p>
+      <p
+        style={{
+          margin: "6px 0 0",
+          fontSize: 14,
+          lineHeight: 1.55,
+          color: "#5c6570",
+        }}
+      >
+        Index und Kopien der Dateien liegen im Datenordner. Beim nächsten Start
+        musst du den Ordner nicht erneut wählen. Klick auf eine Quelle öffnet
+        die gespeicherte Kopie.
+      </p>
+      {location ? (
+        <p
+          data-library-data-dir="true"
+          style={{
+            margin: "10px 0 0",
+            fontSize: 12,
+            lineHeight: 1.45,
+            wordBreak: "break-all",
+            color: "#3d444c",
+            fontFamily: "ui-monospace, Consolas, monospace",
+          }}
+        >
+          {location.dataDir}
+        </p>
+      ) : null}
+      <div
+        style={{
+          display: "flex",
+          flexWrap: "wrap",
+          gap: 10,
+          marginTop: 12,
+        }}
+      >
+        <ActionButton
+          variant="outlined"
+          disabled={ingesting}
+          data-library-export="true"
+          onClick={() => void onExport()}
+        >
+          <ArchiveIcon style={{ width: 16, height: 16 }} />
+          Bibliothek exportieren
+        </ActionButton>
+        <ActionButton
+          variant="outlined"
+          disabled={ingesting}
+          onClick={() => void onImport()}
+        >
+          <FolderOpenIcon style={{ width: 16, height: 16 }} />
+          Bibliothek importieren
+        </ActionButton>
+        <ActionButton
+          variant="muted"
+          disabled={ingesting}
+          onClick={() => void onCopyFolder()}
+        >
+          <FolderOutputIcon style={{ width: 16, height: 16 }} />
+          Datenordner kopieren
+        </ActionButton>
+        <ActionButton
+          variant="muted"
+          onClick={() => void onOpenFolder()}
+        >
+          Datenordner öffnen
+        </ActionButton>
+      </div>
+      <p
+        style={{
+          margin: "12px 0 0",
+          fontSize: 13,
+          lineHeight: 1.5,
+          color: "#5c6570",
+        }}
+      >
+        Anderer Rechner: ZIP exportieren und dort importieren. Oder den
+        Datenordner neben die portable .exe als Ordner «SmartSeacrch-Daten»
+        legen.
+      </p>
     </div>
   );
 }

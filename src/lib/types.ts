@@ -78,6 +78,16 @@ export type LibraryResponse = {
   answerMode: AnswerMode;
 };
 
+export type LibraryLocation = {
+  dataDir: string;
+  originalsDir: string;
+  portable: boolean;
+};
+
+export type LibraryPackResult =
+  | { ok: true; path: string }
+  | { ok: false; error: string };
+
 export type IngestResponse = {
   documents: LibraryDocument[];
   added: LibraryDocument[];

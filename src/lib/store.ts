@@ -1,6 +1,8 @@
 import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import path from "node:path";
 
+import { getDataDir } from "@/lib/data-dir";
+import { clearOriginalsDir, removeOriginalFile } from "@/lib/originals";
 import type { Chunk, LibraryDocument } from "@/lib/types";
 
 export type SearchStore = {
@@ -8,18 +10,10 @@ export type SearchStore = {
   chunks: Chunk[];
 };
 
-let dataDir = path.join(process.cwd(), ".data");
-
-export function setDataDir(dir: string): void {
-  dataDir = dir;
-}
-
-export function getDataDir(): string {
-  return dataDir;
-}
+export { getDataDir, setDataDir } from "@/lib/data-dir";
 
 function indexPath(): string {
-  return path.join(dataDir, "index.json");
+  return path.join(getDataDir(), "index.json");
 }
 
 let writeTail: Promise<void> = Promise.resolve();
@@ -42,7 +36,7 @@ export async function loadStore(): Promise<SearchStore> {
 }
 
 async function persist(store: SearchStore): Promise<void> {
-  await mkdir(dataDir, { recursive: true });
+  await mkdir(getDataDir(), { recursive: true });
   const tmp = `${indexPath()}.tmp`;
   await writeFile(tmp, JSON.stringify(store), "utf8");
   await rename(tmp, indexPath());
@@ -57,6 +51,17 @@ function withWriteLock<T>(fn: () => Promise<T>): Promise<T> {
   return run;
 }
 
+export async function mutateStore(
+  fn: (store: SearchStore) => Promise<SearchStore> | SearchStore,
+): Promise<SearchStore> {
+  return withWriteLock(async () => {
+    const store = await loadStore();
+    const next = await fn(store);
+    await persist(next);
+    return next;
+  });
+}
+
 export async function replaceDocuments(
   incoming: Array<{ document: LibraryDocument; chunks: Chunk[] }>,
 ): Promise<SearchStore> {
@@ -65,8 +70,25 @@ export async function replaceDocuments(
     const incomingPaths = new Set(
       incoming.map((item) => item.document.displayPath),
     );
+    const incomingIds = new Set(incoming.map((item) => item.document.id));
+    const outgoing = store.documents.filter(
+      (doc) =>
+        incomingPaths.has(doc.displayPath) || incomingIds.has(doc.id),
+    );
+    const keptRels = new Set(
+      incoming
+        .map((item) => item.document.sourcePath)
+        .filter((value): value is string => Boolean(value)),
+    );
+    for (const old of outgoing) {
+      if (old.sourcePath && !keptRels.has(old.sourcePath)) {
+        await removeOriginalFile(old.sourcePath);
+      }
+    }
+
     const remainingDocs = store.documents.filter(
-      (doc) => !incomingPaths.has(doc.displayPath),
+      (doc) =>
+        !incomingPaths.has(doc.displayPath) && !incomingIds.has(doc.id),
     );
     const remainingIds = new Set(remainingDocs.map((doc) => doc.id));
     const remainingChunks = store.chunks.filter((chunk) =>
@@ -92,6 +114,8 @@ export async function replaceDocuments(
 export async function removeDocument(documentId: string): Promise<SearchStore> {
   return withWriteLock(async () => {
     const store = await loadStore();
+    const gone = store.documents.find((doc) => doc.id === documentId);
+    if (gone) await removeOriginalFile(gone.sourcePath);
     const next: SearchStore = {
       documents: store.documents.filter((doc) => doc.id !== documentId),
       chunks: store.chunks.filter((chunk) => chunk.documentId !== documentId),
@@ -103,6 +127,7 @@ export async function removeDocument(documentId: string): Promise<SearchStore> {
 
 export async function clearStore(): Promise<SearchStore> {
   return withWriteLock(async () => {
+    await clearOriginalsDir();
     const next = emptyStore();
     await persist(next);
     return next;

@@ -83,7 +83,9 @@ export function App() {
       if (!data) return;
       applyLibrary(data);
       if (data.added.length) {
-        setNotice("Unterlagen sind indexiert. Du kannst jetzt fragen.");
+        setNotice(
+          "Unterlagen sind gespeichert. Beim nächsten Start nicht erneut einlesen.",
+        );
       } else if (data.skipped.length) {
         setLibraryError(
           data.skipped[0]?.reason ??
@@ -205,8 +207,8 @@ export function App() {
                 SmartSeacrch
               </h1>
               <p className="mt-1.5 text-sm leading-6 text-muted-foreground md:text-[0.95rem]">
-                Fragen an Handbücher — lokal, ohne Server, Chats bleiben auf
-                diesem Rechner
+                Fragen an Handbücher — lokal, ohne Server. Unterlagen und Chats
+                bleiben auf diesem Rechner.
               </p>
             </div>
           </div>
@@ -334,6 +336,44 @@ export function App() {
         }}
         onRemove={async (documentId) => {
           applyLibrary(await window.smartsearch.removeDocument(documentId));
+        }}
+        onExportLibrary={async () => {
+          setLibraryError(null);
+          try {
+            const result = await window.smartsearch.exportLibrary();
+            if (!result) return;
+            if (result.ok) {
+              setNotice(`Bibliothek gespeichert:\n${result.path}`);
+            } else {
+              setLibraryError(result.error);
+            }
+          } catch {
+            setLibraryError("Die Bibliothek konnte nicht exportiert werden.");
+          }
+        }}
+        onImportLibrary={() =>
+          runIngest(() => window.smartsearch.importLibrary())
+        }
+        onOpenLibraryFolder={async () => {
+          setLibraryError(null);
+          const result = await window.smartsearch.openLibraryFolder();
+          if (!result.ok) setLibraryError(result.error);
+        }}
+        onCopyLibraryFolder={async () => {
+          setLibraryError(null);
+          try {
+            const result = await window.smartsearch.copyLibraryFolder();
+            if (!result) return;
+            if (result.ok) {
+              setNotice(
+                `Datenordner kopiert nach:\n${result.path}\nDiesen Ordner neben die portable .exe legen.`,
+              );
+            } else {
+              setLibraryError(result.error);
+            }
+          } catch {
+            setLibraryError("Der Datenordner konnte nicht kopiert werden.");
+          }
         }}
       />
     </div>
