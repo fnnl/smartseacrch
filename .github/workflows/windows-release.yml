@@ -29,7 +29,12 @@ jobs:
 
       - name: Ausgabe bei Fehler
         if: failure()
-        run: Get-ChildItem -Recurse release -ErrorAction SilentlyContinue | Select-Object FullName, Length
+        shell: pwsh
+        run: |
+          Get-ChildItem -Recurse release -ErrorAction SilentlyContinue | Select-Object FullName, Length
+          if (Test-Path "$env:USERPROFILE\AppData\Local\electron-builder\Cache") {
+            Write-Host "electron-builder cache present"
+          }
 
       - name: Release veröffentlichen
         uses: softprops/action-gh-release@v2
