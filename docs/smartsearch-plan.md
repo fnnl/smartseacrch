@@ -50,18 +50,16 @@ Kolleginnen und Kollegen brauchen **keinen Server** und **kein Node.js**.
 
 - **Installer:** `SmartSeacrch-Setup-0.1.1.exe` — Setup, dann Startmenü / Desktop
 - **Portable:** `SmartSeacrch-Portable-0.1.1.exe` — Datei kopieren, doppelklicken
-- Download: https://github.com/fnnl/smartseacrch/releases/latest
+- Gebaut mit electron-builder (NSIS + portable), unsigned; unter Windows **Weitere Informationen** → **Trotzdem ausführen**
 - Selbst bauen: `CSC_IDENTITY_AUTO_DISCOVERY=false npm run dist:win` (Windows oder Linux+Wine)
-- GitHub Actions (`.github/workflows/windows-release.yml`) baut auf `windows-latest` bei Tag `v*`
-- Nicht code-signiert: unter Windows **Weitere Informationen** → **Trotzdem ausführen**
+- GitHub Actions (`.github/workflows/windows-release.yml`) bei Tag `v*` — der hosted Windows-Job schlägt derzeit fehl; Release-Assets daher nicht auf GitHub. Tag `v0.1.1` zeigt auf diesen Stand.
 - Daten: installiert unter `%APPDATA%\smartseacrch\data\`; portable nutzt `SmartSeacrch-Daten` neben der .exe, wenn der Ordner existiert
 
 ## Stand (6. Okt. 2026)
 
-- Windows-Paket v0.1.1 mit electron-builder (portable + NSIS), cross-compile Linux/Wine
-- Dateien: `SmartSeacrch-Setup-0.1.1.exe`, `SmartSeacrch-Portable-0.1.1.exe` (~88 MB, PE32 NSIS)
+- GitHub `main`: https://github.com/fnnl/smartseacrch/commit/f0359fb0064bf80cae1a1ca95fc0d01777b6460d
+- Windows-Paket v0.1.1 (portable + NSIS, ~88 MB, PE32)
 - SHA-256 Setup `e3b3141930d742897d9d09de0be35ef42ce4245fb525ef01ff4d512521daa583`, Portable `344013430cffd7bd84a5982a1bcd3c65fcafb6601005f9eb4734ea587e6fe374`
-- GitHub Release (Tag `v0.1.1`) oder direkt die gebauten Dateien neben `SHA256SUMS.txt`
 - Beim Start kein erneutes Einlesen; Klick auf Quellen öffnet die gespeicherte Kopie
 - Screenshots (Agent-Store): `media/library-persists-after-restart.png`, `media/library-data-folder.png`, `media/library-portable-daten.png`
 

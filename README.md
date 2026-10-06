@@ -6,16 +6,15 @@ Repository: https://github.com/fnnl/smartseacrch
 
 ## Für Kolleginnen und Kollegen (Windows)
 
-Fertige Dateien: https://github.com/fnnl/smartseacrch/releases/latest  
-Aktuell: **v0.1.1** (`SmartSeacrch-Setup-0.1.1.exe` und `SmartSeacrch-Portable-0.1.1.exe`).
+Kein Server, kein Node.js, kein Konto. Dominik gibt **eine** der beiden Dateien weiter.
 
-1. Eine Datei herunterladen:
+1. Datei wählen:
    - **SmartSeacrch-Setup-0.1.1.exe** — Installation (Verknüpfung im Startmenü und auf dem Desktop). Danach **SmartSeacrch** aus dem Startmenü öffnen.
    - **SmartSeacrch-Portable-0.1.1.exe** — nur diese eine Datei kopieren (USB-Stick oder Ordner). **Doppelklicken**, nicht installieren. Optional den Ordner `SmartSeacrch-Daten` daneben legen, dann bleiben Index und Dateikopien beim Stick.
 2. Erscheint eine Windows-Warnung («Windows hat den Computer geschützt» / unbekannter Herausgeber): **Weitere Informationen** → **Trotzdem ausführen**. Die Datei ist nicht code-signiert.
 3. Unten eine Frage eintippen. Unterlagen legt die **Verwaltung** an (nicht jede Person).
 
-SHA-256 (v0.1.1):
+SHA-256 (v0.1.1, electron-builder portable + NSIS):
 
 ```
 e3b3141930d742897d9d09de0be35ef42ce4245fb525ef01ff4d512521daa583  SmartSeacrch-Setup-0.1.1.exe
@@ -72,7 +71,7 @@ Danach liegen die Dateien in `release/`:
 - `SmartSeacrch-Setup-0.1.1.exe` — NSIS-Installer
 - `SmartSeacrch-Portable-0.1.1.exe` — portable Einzeldatei
 
-Ein Git-Tag `v0.1.1` (Muster `v*`) startet GitHub Actions auf `windows-latest` und legt die Dateien unter [Releases](https://github.com/fnnl/smartseacrch/releases) ab.
+Ein Git-Tag `v*` startet GitHub Actions auf `windows-latest` (`.github/workflows/windows-release.yml`). Der Hosted-Job schlägt derzeit fehl (kein Code-Signing-Zertifikat / electron-builder auf dem Runner). Die Dateien oben stammen aus `npm run dist:win` mit Wine. Wenn der Job durchläuft, liegen sie unter [Releases](https://github.com/fnnl/smartseacrch/releases).
 
 ## Testdaten
 
