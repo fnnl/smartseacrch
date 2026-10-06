@@ -15,7 +15,12 @@ Aktuell: **v0.1.1** (`SmartSeacrch-Setup-0.1.1.exe` und `SmartSeacrch-Portable-0
 2. Erscheint eine Windows-Warnung («Windows hat den Computer geschützt» / unbekannter Herausgeber): **Weitere Informationen** → **Trotzdem ausführen**. Die Datei ist nicht code-signiert.
 3. Unten eine Frage eintippen. Unterlagen legt die **Verwaltung** an (nicht jede Person).
 
-SHA-256 steht in `SHA256SUMS.txt` neben den Dateien (GitHub Release und Build-Ausgabe). Nach dem lokalen Paketieren hier eintragen.
+SHA-256 (v0.1.1):
+
+```
+e3b3141930d742897d9d09de0be35ef42ce4245fb525ef01ff4d512521daa583  SmartSeacrch-Setup-0.1.1.exe
+344013430cffd7bd84a5982a1bcd3c65fcafb6601005f9eb4734ea587e6fe374  SmartSeacrch-Portable-0.1.1.exe
+```
 
 Node.js, Internet und ein Server sind nicht nötig. Der Index und Kopien der Dateien bleiben auf diesem PC.
 

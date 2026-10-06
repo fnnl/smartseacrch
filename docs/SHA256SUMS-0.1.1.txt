@@ -1,0 +1,2 @@
+e3b3141930d742897d9d09de0be35ef42ce4245fb525ef01ff4d512521daa583  SmartSeacrch-Setup-0.1.1.exe
+344013430cffd7bd84a5982a1bcd3c65fcafb6601005f9eb4734ea587e6fe374  SmartSeacrch-Portable-0.1.1.exe

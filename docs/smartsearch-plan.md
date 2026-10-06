@@ -58,7 +58,10 @@ Kolleginnen und Kollegen brauchen **keinen Server** und **kein Node.js**.
 
 ## Stand (6. Okt. 2026)
 
-- GitHub `main` und Release-Tag `v0.1.1` für das Windows-Paket (portable + NSIS)
+- Windows-Paket v0.1.1 mit electron-builder (portable + NSIS), cross-compile Linux/Wine
+- Dateien: `SmartSeacrch-Setup-0.1.1.exe`, `SmartSeacrch-Portable-0.1.1.exe` (~88 MB, PE32 NSIS)
+- SHA-256 Setup `e3b3141930d742897d9d09de0be35ef42ce4245fb525ef01ff4d512521daa583`, Portable `344013430cffd7bd84a5982a1bcd3c65fcafb6601005f9eb4734ea587e6fe374`
+- GitHub Release (Tag `v0.1.1`) oder direkt die gebauten Dateien neben `SHA256SUMS.txt`
 - Beim Start kein erneutes Einlesen; Klick auf Quellen öffnet die gespeicherte Kopie
 - Screenshots (Agent-Store): `media/library-persists-after-restart.png`, `media/library-data-folder.png`, `media/library-portable-daten.png`
 
