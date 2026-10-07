@@ -26,8 +26,12 @@ Node.js, Internet und ein Server sind nicht nötig. Der Index und Kopien der Dat
 ## Bedienung (Suche)
 
 1. Links **Neuer Chat** oder einen früheren Chat wählen. Die Unterhaltungen bleiben auf diesem Rechner (Benutzerordner der App), ohne Server.
-2. Unten ins Feld **Deine Frage** schreiben, z. B. «Was bedeutet Fehler E12?», dann **Frage senden**. Weitere Fragen gehören zu demselben Chat und denselben Unterlagen.
-3. Quellen stehen als kleine Zahlen unten rechts an der Antwort. Darüberfahren zeigt Datei, Stelle und Passage. **Klicken** öffnet die Originaldatei: PDF möglichst auf der Seite, Word im Standardprogramm, Text mit markierter Stelle. Fehlt die Datei, erscheint ein klarer Hinweis.
+2. Unten ins Feld **Frage oder Fall** schreiben, z. B. «Was bedeutet Fehler E12?», dann **Frage senden**.
+3. **Folgefrage:** Im selben Chat reicht «und beim KV-800?». Die App bezieht das auf die vorherige Frage (z. B. E12) und sucht in denselben Unterlagen — ohne Server.
+4. **Fall prüfen:** Eine konkrete Meldung einfügen (Gerät, Fehler, Symptome, was schon geprüft wurde), z. B. aus `testdaten/probleme/`. Die App hält den Fall gegen die Checklisten (`testdaten/checklisten/`): welche Schritte gelten, was erledigt ist, was noch offen ist. Quellen als Fußnoten.
+5. Quellen stehen als kleine Zahlen unten rechts an der Antwort. Darüberfahren zeigt Datei, Stelle und Passage. **Klicken** öffnet die Originaldatei: PDF möglichst auf der Seite, Word im Standardprogramm, Text mit markierter Stelle. Fehlt die Datei, erscheint ein klarer Hinweis.
+
+Ohne API-Key kommen die Antworten aus den indexierten Texten (Suche + Checklisten-Abgleich). Optional `OPENAI_API_KEY` oder `ANTHROPIC_API_KEY` in der Umgebung — dann formuliert ein Sprachmodell den Dialog, fällt aber ohne Netz auf die lokale Prüfung zurück.
 
 ## Verwaltung (Quellen)
 
@@ -55,7 +59,7 @@ Ein Klick auf eine Quellen-Zahl öffnet die **gespeicherte Kopie**, nicht den ur
 
 Kein Konto, kein Upload, kein Abgleich über das Netz.
 
-Ohne API-Key: Antworten sind Auszüge aus den Dokumenten. Optional `OPENAI_API_KEY` oder `ANTHROPIC_API_KEY` in der Umgebung, dann formuliert ein Sprachmodell.
+Ohne API-Key: Antworten sind Auszüge und Checklisten-Abgleich. Optional `OPENAI_API_KEY` oder `ANTHROPIC_API_KEY` in der Umgebung, dann formuliert ein Sprachmodell.
 
 ## Windows-Paket selbst bauen
 

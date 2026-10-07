@@ -46,6 +46,7 @@ function persistableTurn(turn: ChatTurn): ChatTurn | null {
     answer: turn.answer,
     sources: Array.isArray(turn.sources) ? turn.sources : undefined,
     mode: turn.mode,
+    kind: turn.kind,
     fallbackReason: turn.fallbackReason,
     error: turn.error,
     createdAt: turn.createdAt || new Date().toISOString(),

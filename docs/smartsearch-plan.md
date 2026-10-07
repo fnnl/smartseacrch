@@ -23,7 +23,8 @@ Ein **lokales Windows-Programm**, das Kolleginnen und Kollegen ohne Server weite
 - Firmenlogo in der Verwaltung (PNG, JPG, SVG, WebP), lokal gespeichert
 - Quellen als kleine Zahlen unten rechts an der Antwort; darüberfahren zeigt Datei, Stelle und Passage
 - Klick auf die Zahl öffnet die gespeicherte Kopie (PDF auf der Seite, wenn bekannt; Word im Standardprogramm; Text mit markierter Stelle). Fehlt die Datei: klarer Fehler
-- Chat wie eine Unterhaltung: mehrere Fragen zu denselben Unterlagen, «Neuer Chat» und Liste früherer Chats
+- Chat wie eine Unterhaltung: Folgefragen beziehen sich auf vorherige Fragen (z. B. «und beim KV-800?»)
+- Fall einfügen (Fehler, Gerät, Symptome, bisherige Schritte): Abgleich mit Checklisten — gilt / erledigt / offen, mit Fußnoten
 - Chats bleiben lokal im Benutzerordner der App (Electron userData), ohne Server, überstehen Neustart
 - Unterlagen: Kopien im Datenordner (`index.json` + `originals/`); Start liest den Index, Ordner nicht erneut wählen
 - Bibliothek als ZIP exportieren/importieren; oder Ordner `SmartSeacrch-Daten` neben die portable .exe kopieren. Kein Server, kein Sync
@@ -34,8 +35,8 @@ Ein **lokales Windows-Programm**, das Kolleginnen und Kollegen ohne Server weite
 - Ordner oder Dateien vom Rechner wählen (nativer Dialog) — **nur Verwaltung**
 - Formate: `.docx`, `.pdf`, `.txt` / `.md`
 - Texte zerlegen, lokal indexieren (BM25)
-- Chat: mehrere Fragen in einer Unterhaltung, Liste früherer Chats, lokal gespeichert
-- Ohne API-Key: Auszüge; optional LLM-Key
+- Chat: Folgefragen nutzen den bisherigen Verlauf; Fallprüfung gegen Checklisten ohne Server
+- Ohne API-Key: Auszüge + Checklisten-Abgleich; optional LLM-Key für den Dialog, sonst lokaler Fallback
 - Deutsch in der Oberfläche
 - Index und Dateikopien im Benutzerordner der App (überstehen Neustart)
 - Bibliothek ZIP-Export/Import und portabler Ordner `SmartSeacrch-Daten`
@@ -55,13 +56,13 @@ Kolleginnen und Kollegen brauchen **keinen Server** und **kein Node.js**.
 - GitHub Actions (`.github/workflows/windows-release.yml`) bei Tag `v*` — der hosted Windows-Job schlägt derzeit fehl; Release-Assets daher nicht auf GitHub. Tag `v0.1.1` zeigt auf diesen Stand.
 - Daten: installiert unter `%APPDATA%\smartseacrch\data\`; portable nutzt `SmartSeacrch-Daten` neben der .exe, wenn der Ordner existiert
 
-## Stand (6. Okt. 2026)
+## Stand (7. Okt. 2026)
 
-- GitHub `main`: https://github.com/fnnl/smartseacrch/commit/f0359fb0064bf80cae1a1ca95fc0d01777b6460d
-- Windows-Paket v0.1.1 (portable + NSIS, ~88 MB, PE32)
-- SHA-256 Setup `e3b3141930d742897d9d09de0be35ef42ce4245fb525ef01ff4d512521daa583`, Portable `344013430cffd7bd84a5982a1bcd3c65fcafb6601005f9eb4734ea587e6fe374`
-- Beim Start kein erneutes Einlesen; Klick auf Quellen öffnet die gespeicherte Kopie
-- Screenshots (Agent-Store): `media/library-persists-after-restart.png`, `media/library-data-folder.png`, `media/library-portable-daten.png`
+- Folgefragen im Chat nutzen den bisherigen Verlauf (ohne Server)
+- Eingefügter Fall wird gegen indexierte Checklisten geprüft (erledigt / offen / fehlt), Quellen als Fußnoten
+- Testdaten: `testdaten/checklisten/` und `testdaten/probleme/`
+- Windows-Paket v0.1.1 bleibt; GitHub `main` nach diesem Stand
+- Screenshots (Agent-Store): `media/followup-kv800.png`, `media/case-against-checklist.png`
 
 ## Danach
 

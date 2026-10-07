@@ -30,6 +30,7 @@ export type SmartsearchApi = {
   adminLogout: () => Promise<AdminStatus>;
   ask: (
     question: string,
+    priorTurns?: Array<{ question: string; answer?: string }>,
   ) => Promise<AskResponse & { error?: string }>;
   loadChats: () => Promise<ChatsSnapshot>;
   createChat: () => Promise<ChatsSnapshot>;
@@ -63,7 +64,8 @@ const api: SmartsearchApi = {
   adminSetup: (password) => ipcRenderer.invoke("admin:setup", password),
   adminLogin: (password) => ipcRenderer.invoke("admin:login", password),
   adminLogout: () => ipcRenderer.invoke("admin:logout"),
-  ask: (question) => ipcRenderer.invoke("ask", question),
+  ask: (question, priorTurns) =>
+    ipcRenderer.invoke("ask", question, priorTurns),
   loadChats: () => ipcRenderer.invoke("chats:load"),
   createChat: () => ipcRenderer.invoke("chats:create"),
   selectChat: (id) => ipcRenderer.invoke("chats:select", id),

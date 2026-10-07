@@ -120,8 +120,12 @@ export function App() {
     };
     patchActiveTurns((current) => [...current, pending]);
     setAsking(true);
+    const priorTurns = activeChat.turns
+      .filter((turn) => !turn.pending && !turn.error && turn.answer)
+      .slice(-8)
+      .map((turn) => ({ question: turn.question, answer: turn.answer }));
     try {
-      const data = await window.smartsearch.ask(question);
+      const data = await window.smartsearch.ask(question, priorTurns);
       if (data.error) {
         const failed: ChatTurn = {
           id: pendingId,

@@ -34,11 +34,13 @@ export type SourceHit = {
 };
 
 export type AnswerMode = "extractive" | "generative";
+export type AnswerKind = "search" | "followup" | "checklist";
 
 export type AskResponse = {
   answer: string;
   sources: SourceHit[];
   mode: AnswerMode;
+  kind?: AnswerKind;
   fallbackReason?: string;
 };
 
@@ -48,6 +50,7 @@ export type ChatTurn = {
   answer?: string;
   sources?: SourceHit[];
   mode?: AnswerMode;
+  kind?: AnswerKind;
   fallbackReason?: string;
   error?: string;
   pending?: boolean;

@@ -44,7 +44,7 @@ Filter tauschen, Schwimmerklappe gängig machen, Programm Filterwechsel bestäti
 const CHECKLISTE = [
   "Kurzcheckliste Stoerungen KV-400",
   "",
-  "E12 Wassertank:",
+  "E12 Wassertank (KV-400):",
   "- Tank sitzt fest und ist gefuellt.",
   "- Schwimmerklappe muss frei schwingen.",
   "- Wasserfilter nicht aelter als 8 Wochen.",
@@ -54,9 +54,15 @@ const CHECKLISTE = [
   "- Bohnenbehaelter oeffnen und auf Fremdkoerper pruefen.",
   "- Mahlgrad eine Stufe groeber stellen und erneut mahlen.",
   "",
+  "E18 Tropfschale:",
+  "- Schale leeren, Sensor TS-4 trocken, 10 Sekunden warten.",
+  "- KV-800: Ablaufschlauch ohne Knick.",
+  "",
   "E21 Brueheinheit:",
   "- Brueheinheit entnehmen, mit handwarmem Wasser spuelen, einrasten.",
   "- Nicht in die Spuelmaschine geben.",
+  "",
+  "E52 (nur KV-800): Milch kuelter als 8 Grad, Fuehler wischen.",
 ];
 
 export async function buildSampleFiles(): Promise<SampleFile[]> {

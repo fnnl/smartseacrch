@@ -331,20 +331,36 @@ function registerIpc(): void {
     openSourceHit(hit),
   );
 
-  ipcMain.handle("ask", async (_event, question: string) => {
-    const trimmed = question.trim();
-    if (!trimmed) {
-      return { error: "Bitte eine Frage eingeben." };
-    }
-    const store = await loadStore();
-    if (!store.chunks.length) {
-      return {
-        error:
-          "Es sind noch keine Unterlagen hinterlegt. Die Verwaltung legt sie an.",
-      };
-    }
-    return answerQuestion(store.chunks, trimmed);
-  });
+  ipcMain.handle(
+    "ask",
+    async (
+      _event,
+      question: string,
+      priorTurns?: Array<{ question: string; answer?: string }>,
+    ) => {
+      const trimmed = typeof question === "string" ? question.trim() : "";
+      if (!trimmed) {
+        return { error: "Bitte eine Frage eingeben." };
+      }
+      const store = await loadStore();
+      if (!store.chunks.length) {
+        return {
+          error:
+            "Es sind noch keine Unterlagen hinterlegt. Die Verwaltung legt sie an.",
+        };
+      }
+      const prior = Array.isArray(priorTurns)
+        ? priorTurns
+            .filter((turn) => turn && typeof turn.question === "string")
+            .map((turn) => ({
+              question: turn.question,
+              answer: typeof turn.answer === "string" ? turn.answer : undefined,
+            }))
+            .slice(-8)
+        : [];
+      return answerQuestion(store.chunks, trimmed, prior);
+    },
+  );
 }
 
 let currentLocation = {

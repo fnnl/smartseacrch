@@ -14,7 +14,8 @@
     "dist:mac": "electron-vite build && electron-builder --mac",
     "dist:linux": "electron-vite build && electron-builder --linux",
     "install:desktop": "bash scripts/install-linux-desktop.sh",
-    "lint": "tsc --noEmit"
+    "lint": "tsc --noEmit",
+    "test:dialogue": "npx tsx --tsconfig tsconfig.json src/lib/conversation.selftest.ts && npx tsx --tsconfig tsconfig.json src/lib/checklist.selftest.ts"
   },
   "dependencies": {
     "class-variance-authority": "^0.7.1",

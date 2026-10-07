@@ -15,9 +15,9 @@ type ChatPanelProps = {
 };
 
 const EXAMPLES = [
-  "Wie wechsle ich den Wasserfilter?",
   "Was bedeutet Fehler E12?",
-  "Wie oft muss ich entkalken?",
+  "und beim KV-800?",
+  "Fall: KV-400 zeigt E12, Tank ist voll, Filter seit 8 Monaten nicht gewechselt, Schwimmerklappe klemmt.",
 ];
 
 export function ChatPanel({
@@ -71,7 +71,7 @@ export function ChatPanel({
           <h2 className="font-heading text-xl tracking-tight">Chat</h2>
           <p className="mt-1.5 text-[0.95rem] leading-7 text-muted-foreground">
             {ready
-              ? "Mehrere Fragen hintereinander zu denselben Unterlagen. Quellen stehen klein unten rechts."
+              ? "Folgefragen gelten für diesen Chat, z. B. «und beim KV-800?». Einen Fall — Fehler, Gerät, Symptome — hier einfügen: die App prüft ihn gegen die Checklisten."
               : "Sobald Unterlagen indexiert sind, kannst du in einem Chat nach Fehlern, Schritten und Teilen fragen."}
           </p>
         </div>
@@ -181,7 +181,7 @@ export function ChatPanel({
             marginBottom: 8,
           }}
         >
-          Deine Frage
+          Frage oder Fall
         </label>
         <div style={{ display: "flex", alignItems: "stretch", gap: 12, flexWrap: "wrap" }}>
           <textarea
@@ -198,7 +198,7 @@ export function ChatPanel({
             }}
             placeholder={
               ready
-                ? "Nächste Frage in diesem Chat, z. B. Und wie oft muss ich entkalken?"
+                ? "Nächste Frage, z. B. und beim KV-800? Oder einen Fall mit Fehler, Gerät und bisherigen Schritten einfügen."
                 : "Zuerst muss die Verwaltung Unterlagen hinterlegen — dann hier die Frage eingeben"
             }
             disabled={asking || !ready}
@@ -255,7 +255,7 @@ export function ChatPanel({
             color: "var(--muted-foreground)",
           }}
         >
-          Eingabe sendet die Frage. Umschalt+Eingabe macht eine neue Zeile.
+          Eingabe sendet. Umschalt+Eingabe neue Zeile. Folgefragen nutzen den bisherigen Chat; ein eingefügter Fall wird gegen die Checklisten geprüft.
         </p>
       </form>
     </div>
@@ -279,12 +279,12 @@ function EmptyChat({
       <div>
         <p className="font-heading text-2xl tracking-tight">
           {ready
-            ? "Stelle mehrere Fragen in diesem Chat"
+            ? "Frage nach, oder füge einen Fall ein"
             : "Lade zuerst deine Unterlagen"}
         </p>
         <p className="mt-3 text-[0.95rem] leading-7 text-muted-foreground">
           {ready
-            ? "Die indexierten Dateien bleiben dieselben. Ein neuer Chat beginnt eine neue Unterhaltung, ohne den Index zu ändern."
+            ? "Dieselben Unterlagen, derselbe Chat. Eine kurze Folgefrage bezieht sich auf das Vorherige. Ein konkretes Beispiel (Störung, Gerät, was schon geprüft wurde) wird gegen die Checklisten gehalten."
             : "Die Verwaltung hinterlegt die Handbücher und Problembeschreibungen. Danach die Frage ins Feld unten schreiben."}
         </p>
       </div>
@@ -309,6 +309,7 @@ function EmptyChat({
 function AnswerCard({ turn }: { turn: ChatTurn }) {
   return (
     <article
+      data-answer-kind={turn.kind ?? "search"}
       style={{
         position: "relative",
         maxWidth: "46rem",
@@ -318,11 +319,7 @@ function AnswerCard({ turn }: { turn: ChatTurn }) {
       }}
     >
       <div className="mb-3 flex flex-wrap items-center gap-2">
-        <Badge variant="secondary">
-          {turn.mode === "generative"
-            ? "Formuliert mit Sprachmodell"
-            : "Auszug aus den Unterlagen"}
-        </Badge>
+        <Badge variant="secondary">{answerBadge(turn)}</Badge>
       </div>
       <p
         style={{
@@ -568,6 +565,22 @@ function SourceFootnote({
   );
 }
 
+function answerBadge(turn: ChatTurn): string {
+  if (turn.kind === "checklist") {
+    return turn.mode === "generative"
+      ? "Fallprüfung mit Sprachmodell"
+      : "Fallprüfung gegen Checklisten";
+  }
+  if (turn.kind === "followup") {
+    return turn.mode === "generative"
+      ? "Folgefrage mit Sprachmodell"
+      : "Folgefrage aus den Unterlagen";
+  }
+  return turn.mode === "generative"
+    ? "Formuliert mit Sprachmodell"
+    : "Auszug aus den Unterlagen";
+}
+
 export function turnFromResponse(
   question: string,
   response: AskResponse,
@@ -578,6 +591,7 @@ export function turnFromResponse(
     answer: response.answer,
     sources: response.sources,
     mode: response.mode,
+    kind: response.kind,
     fallbackReason: response.fallbackReason,
     createdAt: new Date().toISOString(),
   };
