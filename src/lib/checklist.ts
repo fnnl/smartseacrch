@@ -37,7 +37,7 @@ export type CaseAnalysis = {
 };
 
 const CHECKLIST_NAME =
-  /checkliste|wartung|sicherheit|stoerung|störung|interval|kurzcheck/i;
+  /checkliste|kurzcheck|sicherheitshinweis|wartungsinterval|stoerungen/i;
 
 const DONE_RE =
   /gepr[uü]ft|entnommen|getauscht|bestaetigt|bestätigt|gesp[uü]lt|abgetrocknet|gewechselt|eingesetzt|glattgezogen|entleert|bewegt|gewartet|durchgef[uü]hrt|erledigt|gew[aä]ssert|gekl[aä]rt|klick/i;
